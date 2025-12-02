@@ -1,14 +1,15 @@
 # Multi-stage build for Worker Service
+# Build context is project root
 FROM node:20-alpine AS dependencies
 
 WORKDIR /app
 
-# Copy package files for dependency installation
+# Copy root and all package.json files for workspace setup
 COPY package.json package-lock.json* ./
-COPY ../../package.json ../../package-lock.json* ../../
-COPY ../shared/package.json ../shared/
+COPY packages/worker/package.json packages/worker/
+COPY packages/shared/package.json packages/shared/
 
-# Install dependencies
+# Install all dependencies (npm workspaces will handle it)
 RUN npm ci && npm cache clean --force
 
 FROM node:20-alpine AS build
@@ -17,20 +18,19 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json* ./
-COPY ../../package.json ../../package-lock.json* ../../
-COPY ../shared/package.json ../shared/
-COPY ../shared/tsconfig.json ../shared/
-COPY ../shared/src ../shared/src
+COPY packages/worker/package.json packages/worker/
+COPY packages/shared/package.json packages/shared/
 
-# Install dependencies
+# Copy all dependencies from dependencies stage
 COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=dependencies /../../node_modules ../../node_modules
 
-# Copy source code and config
-COPY tsconfig.json ./
-COPY src ./src
+# Copy source files
+COPY packages/worker/tsconfig.json packages/worker/
+COPY packages/worker/src packages/worker/src
+COPY packages/shared packages/shared
 
 # Build the application
+WORKDIR /app/packages/worker
 RUN npm run build
 
 FROM node:20-alpine AS production
@@ -43,24 +43,24 @@ RUN addgroup -g 1001 -S nodejs && \
 
 # Copy package files
 COPY package.json package-lock.json* ./
-COPY ../../package.json ../../package-lock.json* ../../
-COPY ../shared/package.json ../shared/
+COPY packages/worker/package.json packages/worker/
+COPY packages/shared/package.json packages/shared/
 
 # Install production dependencies only
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy built application from build stage
-COPY --from=build /app/dist ./dist
+# Copy built application
+COPY --from=build /app/packages/worker/dist ./packages/worker/dist
 
 # Set ownership
 RUN chown -R nodejs:nodejs /app
 
 USER nodejs
 
-# Health check (worker doesn't have HTTP endpoint, so just check process)
+WORKDIR /app/packages/worker
+
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD pgrep -f "node dist/index.js" || exit 1
 
 CMD ["node", "dist/index.js"]
-
-

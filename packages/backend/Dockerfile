@@ -2,92 +2,97 @@
 # Build context is project root
 FROM node:20-alpine AS dependencies
 
-WORKDIR /app/backend
+WORKDIR /app
 
-# Copy package files for dependency installation
-COPY packages/backend/package.json packages/backend/package-lock.json* ./
-COPY package.json package-lock.json* ../root/
-COPY packages/shared/package.json ../shared/
+# Copy root and all package.json files for workspace setup
+COPY package.json package-lock.json* ./
+COPY packages/backend/package.json packages/backend/
+COPY packages/shared/package.json packages/shared/
 
-# Install dependencies
-RUN cd /app/backend && npm ci --only=production && npm cache clean --force
+# Install all dependencies (npm workspaces will handle it)
+RUN npm ci && npm cache clean --force
 
 FROM node:20-alpine AS prisma
 
-WORKDIR /app/backend
+WORKDIR /app
 
 # Copy package files
-COPY packages/backend/package.json packages/backend/package-lock.json* ./
-COPY package.json package-lock.json* ../root/
-COPY packages/shared/package.json ../shared/
+COPY package.json package-lock.json* ./
+COPY packages/backend/package.json packages/backend/
+COPY packages/shared/package.json packages/shared/
 
-# Install all dependencies (including dev dependencies for Prisma)
-RUN cd /app/backend && npm ci && npm cache clean --force
+# Copy dependencies from previous stage
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=dependencies /app/packages/backend/node_modules ./packages/backend/node_modules 2>/dev/null || true
+COPY --from=dependencies /app/packages/shared/node_modules ./packages/shared/node_modules 2>/dev/null || true
 
 # Copy Prisma schema
-COPY packages/backend/prisma ./prisma
+COPY packages/backend/prisma ./packages/backend/prisma
 
 # Generate Prisma Client
-RUN cd /app/backend && npx prisma generate
+WORKDIR /app/packages/backend
+RUN npx prisma generate
 
 FROM node:20-alpine AS build
 
-WORKDIR /app/backend
+WORKDIR /app
 
 # Copy package files
-COPY packages/backend/package.json packages/backend/package-lock.json* ./
-COPY package.json package-lock.json* ../root/
-COPY packages/shared/package.json ../shared/
-COPY packages/shared/tsconfig.json ../shared/
-COPY packages/shared/src ../shared/src
+COPY package.json package-lock.json* ./
+COPY packages/backend/package.json packages/backend/
+COPY packages/shared/package.json packages/shared/
 
-# Install all dependencies for build
-RUN cd /app/backend && npm ci && npm cache clean --force
+# Copy all dependencies from dependencies stage
+COPY --from=dependencies /app/node_modules ./node_modules
 
-# Copy Prisma generated client from previous stage
-COPY --from=prisma /app/backend/node_modules/.prisma ./node_modules/.prisma
-COPY --from=prisma /app/backend/node_modules/@prisma ./node_modules/@prisma
+# Copy Prisma generated client
+COPY --from=prisma /app/packages/backend/node_modules/.prisma ./packages/backend/node_modules/.prisma
+COPY --from=prisma /app/packages/backend/node_modules/@prisma ./packages/backend/node_modules/@prisma
 
-# Copy source code
-COPY packages/backend/tsconfig.json ./
-COPY packages/backend/src ./src
-COPY packages/backend/prisma ./prisma
-COPY packages/backend/nest-cli.json ./
+# Copy source files
+COPY packages/backend/tsconfig.json packages/backend/
+COPY packages/backend/nest-cli.json packages/backend/
+COPY packages/backend/src packages/backend/src
+COPY packages/backend/prisma packages/backend/prisma
+COPY packages/shared packages/shared
 
 # Build the application
-RUN cd /app/backend && npm run build
+WORKDIR /app/packages/backend
+RUN npm run build
 
 FROM node:20-alpine AS production
 
-WORKDIR /app/backend
+WORKDIR /app
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
 # Copy package files
-COPY packages/backend/package.json packages/backend/package-lock.json* ./
-COPY package.json package-lock.json* ../root/
-COPY packages/shared/package.json ../shared/
+COPY package.json package-lock.json* ./
+COPY packages/backend/package.json packages/backend/
+COPY packages/shared/package.json packages/shared/
 
 # Install production dependencies only
-RUN cd /app/backend && npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production && npm cache clean --force
 
 # Copy Prisma generated client and schema
-COPY --from=prisma /app/backend/node_modules/.prisma ./node_modules/.prisma
-COPY --from=prisma /app/backend/node_modules/@prisma ./node_modules/@prisma
-COPY packages/backend/prisma ./prisma
+COPY --from=prisma /app/packages/backend/node_modules/.prisma ./packages/backend/node_modules/.prisma
+COPY --from=prisma /app/packages/backend/node_modules/@prisma ./packages/backend/node_modules/@prisma
+COPY packages/backend/prisma ./packages/backend/prisma
 
-# Copy built application from build stage
-COPY --from=build /app/backend/dist ./dist
+# Copy built application
+COPY --from=build /app/packages/backend/dist ./packages/backend/dist
 
 # Copy Prisma helper script
-COPY packages/backend/run-prisma-with-env.js ./
+COPY packages/backend/run-prisma-with-env.js ./packages/backend/
 
 # Set ownership
 RUN chown -R nodejs:nodejs /app
 
 USER nodejs
+
+WORKDIR /app/packages/backend
 
 EXPOSE 3000
 
