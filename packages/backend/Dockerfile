@@ -76,6 +76,11 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Install OpenSSL for Prisma compatibility
+RUN apk add --no-cache openssl1.1-compat || \
+    (echo "Note: openssl1.1-compat not available, trying openssl..." && \
+     apk add --no-cache openssl libc6-compat)
+
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
