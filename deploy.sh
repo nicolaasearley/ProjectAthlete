@@ -131,16 +131,27 @@ $DOCKER_COMPOSE_CMD up -d
 echo ""
 
 # Wait a moment for services to start
-sleep 5
+sleep 10
 
 # Health checks
 echo -e "${BLUE}🏥 Checking service health...${NC}"
 
 # Check backend
+BACKEND_STATUS=$(docker inspect --format='{{.State.Status}}' project-athlete-backend 2>/dev/null || echo "not found")
+if [ "$BACKEND_STATUS" != "running" ]; then
+  echo -e "${RED}❌ Backend container is not running (status: $BACKEND_STATUS)${NC}"
+  echo ""
+  echo "Backend container logs:"
+  docker logs project-athlete-backend --tail 50
+  exit 1
+fi
+
 if curl -f http://localhost:${API_PORT:-3000}/api/v1/health &> /dev/null; then
   echo -e "${GREEN}✅ Backend is healthy${NC}"
 else
   echo -e "${YELLOW}⚠️  Backend health check failed (may still be starting)${NC}"
+  echo "Backend container logs:"
+  docker logs project-athlete-backend --tail 30
 fi
 
 # Check frontend
