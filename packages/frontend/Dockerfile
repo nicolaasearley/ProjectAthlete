@@ -10,7 +10,8 @@ COPY packages/frontend/package.json packages/frontend/
 COPY packages/shared/package.json packages/shared/
 
 # Install all dependencies (npm workspaces will handle it)
-RUN npm ci && npm cache clean --force
+# Using npm install instead of npm ci to handle lockfile sync issues during build
+RUN npm install && npm cache clean --force
 
 FROM node:20-alpine AS build
 
@@ -55,7 +56,7 @@ COPY packages/frontend/package.json ./packages/frontend/
 # Install only production dependencies needed for serving
 # Use root workspace install, then we can use the frontend package
 WORKDIR /app
-RUN npm ci --omit=dev --workspace=packages/frontend && npm cache clean --force
+RUN npm install --omit=dev --workspace=packages/frontend && npm cache clean --force
 WORKDIR /app/packages/frontend
 
 # Copy built application
