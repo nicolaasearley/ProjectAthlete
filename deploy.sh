@@ -126,7 +126,13 @@ fi
 
 # Start all services (backend will start now that migrations are done)
 echo -e "${BLUE}🚀 Starting all services...${NC}"
-$DOCKER_COMPOSE_CMD up -d
+if ! $DOCKER_COMPOSE_CMD up -d; then
+  echo -e "${RED}❌ Failed to start services${NC}"
+  echo ""
+  echo -e "${BLUE}Backend container logs:${NC}"
+  docker logs project-athlete-backend --tail 50 2>&1 || echo "Container not found or no logs available"
+  exit 1
+fi
 
 echo ""
 
@@ -141,8 +147,18 @@ BACKEND_STATUS=$(docker inspect --format='{{.State.Status}}' project-athlete-bac
 if [ "$BACKEND_STATUS" != "running" ]; then
   echo -e "${RED}❌ Backend container is not running (status: $BACKEND_STATUS)${NC}"
   echo ""
-  echo "Backend container logs:"
-  docker logs project-athlete-backend --tail 50
+  echo -e "${BLUE}📋 Backend container logs (last 100 lines):${NC}"
+  echo "----------------------------------------"
+  docker logs project-athlete-backend --tail 100 2>&1 || echo "Could not retrieve logs"
+  echo ""
+  echo -e "${YELLOW}💡 Common issues:${NC}"
+  echo "  1. Missing JWT secrets (JWT_ACCESS_SECRET, JWT_REFRESH_SECRET)"
+  echo "  2. Database connection error (check DATABASE_URL)"
+  echo "  3. Port already in use"
+  echo "  4. Missing environment variables"
+  echo ""
+  echo -e "${BLUE}To check environment variables:${NC}"
+  echo "  docker exec project-athlete-backend env | grep -E 'JWT|DATABASE'"
   exit 1
 fi
 
@@ -150,8 +166,11 @@ if curl -f http://localhost:${API_PORT:-3000}/api/v1/health &> /dev/null; then
   echo -e "${GREEN}✅ Backend is healthy${NC}"
 else
   echo -e "${YELLOW}⚠️  Backend health check failed (may still be starting)${NC}"
-  echo "Backend container logs:"
-  docker logs project-athlete-backend --tail 30
+  echo ""
+  echo -e "${BLUE}📋 Backend container logs (last 50 lines):${NC}"
+  echo "----------------------------------------"
+  docker logs project-athlete-backend --tail 50 2>&1
+  echo ""
 fi
 
 # Check frontend
