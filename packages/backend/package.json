@@ -21,7 +21,8 @@
     "prisma:generate": "npx prisma generate",
     "prisma:migrate": "node run-prisma-with-env.js migrate dev",
     "prisma:studio": "dotenv -e ../../.env -- npx prisma studio",
-    "prisma:seed": "dotenv -e ../../.env -- ts-node --transpile-only prisma/seed.ts"
+    "prisma:seed": "dotenv -e ../../.env -- ts-node --transpile-only prisma/seed.ts",
+    "prisma:seed:docker": "npx ts-node --transpile-only prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
