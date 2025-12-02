@@ -113,14 +113,18 @@ echo -e "${GREEN}✅ Database is ready${NC}"
 
 echo ""
 
-# Run migrations if requested or on first deployment
-if [ "$MIGRATE" = true ] || [ -z "$(docker ps -q -f name=project-athlete-backend)" ]; then
+# Run migrations before starting backend (use one-off container)
+if [ "$MIGRATE" = true ] || [ -z "$(docker ps -aq -f name=project-athlete-backend)" ]; then
   echo -e "${BLUE}🔄 Running database migrations...${NC}"
-  ./scripts/migrate-db.sh || echo -e "${YELLOW}⚠️  Migration script not found, skipping...${NC}"
+  ./scripts/migrate-db.sh || {
+    echo -e "${RED}❌ Migration failed${NC}"
+    echo "Check the error messages above"
+    exit 1
+  }
   echo ""
 fi
 
-# Start all services
+# Start all services (backend will start now that migrations are done)
 echo -e "${BLUE}🚀 Starting all services...${NC}"
 $DOCKER_COMPOSE_CMD up -d
 
