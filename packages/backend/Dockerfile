@@ -57,14 +57,20 @@ COPY packages/shared packages/shared
 
 # Build the application
 WORKDIR /app/packages/backend
-RUN echo "=== Starting build ===" && \
-    npm run build 2>&1 | head -100 && \
-    echo "=== Build complete, checking dist directory ===" && \
-    ls -la dist/ && \
-    echo "=== Checking for main.js ===" && \
-    find dist -name "main.js" -o -name "*.js" | head -20 && \
-    echo "=== Verifying main.js exists ===" && \
-    test -f dist/main.js || (echo "ERROR: dist/main.js not found after build! Contents of dist:" && ls -laR dist/ && exit 1)
+RUN npm run build
+RUN echo "=== Checking dist structure ===" && \
+    find dist -type f -name "*.js" | head -10 && \
+    find dist -type f | head -20 && \
+    if [ -f dist/main.js ]; then \
+      echo "✅ Found dist/main.js"; \
+    elif [ -f dist/src/main.js ]; then \
+      echo "⚠️  Found dist/src/main.js, moving to dist/main.js"; \
+      mv dist/src/* dist/ && rmdir dist/src; \
+    else \
+      echo "❌ main.js not found! Full dist contents:"; \
+      ls -laR dist/; \
+      exit 1; \
+    fi
 
 FROM node:20-alpine AS production
 
