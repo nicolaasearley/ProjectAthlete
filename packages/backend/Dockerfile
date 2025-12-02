@@ -50,6 +50,7 @@ COPY --from=prisma /app/packages/backend/node_modules/.prisma ./packages/backend
 COPY --from=prisma /app/packages/backend/node_modules/@prisma ./packages/backend/node_modules/@prisma
 
 # Copy source files
+COPY tsconfig.json ./
 COPY packages/backend/tsconfig.json packages/backend/
 COPY packages/backend/nest-cli.json packages/backend/
 COPY packages/backend/src packages/backend/src

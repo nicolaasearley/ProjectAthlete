@@ -25,6 +25,7 @@ COPY packages/shared/package.json packages/shared/
 COPY --from=dependencies /app/node_modules ./node_modules
 
 # Copy source files
+COPY tsconfig.json ./
 COPY packages/worker/tsconfig.json packages/worker/
 COPY packages/worker/src packages/worker/src
 COPY packages/shared packages/shared
