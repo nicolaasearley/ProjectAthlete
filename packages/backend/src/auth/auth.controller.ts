@@ -37,8 +37,19 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    const result = await this.authService.login(loginDto, res);
-    return res.json(result);
+    try {
+      const result = await this.authService.login(loginDto, res);
+      return res.json(result);
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error instanceof Error) {
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          message: error.message || 'Internal server error',
+          error: 'Internal Server Error',
+        });
+      }
+      throw error;
+    }
   }
 
   @Public()

@@ -197,13 +197,25 @@ export class AuthService {
       type: 'refresh',
     };
 
+    const accessSecret = this.configService.get<string>('JWT_ACCESS_SECRET') 
+      || process.env.JWT_ACCESS_SECRET;
+    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET') 
+      || process.env.JWT_REFRESH_SECRET;
+
+    if (!accessSecret) {
+      throw new Error('JWT_ACCESS_SECRET is not configured');
+    }
+    if (!refreshSecret) {
+      throw new Error('JWT_REFRESH_SECRET is not configured');
+    }
+
     const accessToken = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+      secret: accessSecret,
       expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
     });
 
     const refreshToken = this.jwtService.sign(refreshPayload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      secret: refreshSecret,
       expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
     });
 
