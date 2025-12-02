@@ -47,10 +47,19 @@ if ! docker images | grep -q projectathlete-backend; then
   exit 1
 fi
 
+# Determine network name (docker-compose creates it with project prefix)
+PROJECT_NAME=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]//g')
+NETWORK_NAME="${PROJECT_NAME}_project-athlete-network" || "projectathlete_project-athlete-network"
+
+# Check if network exists, if not use default
+if ! docker network ls | grep -q "$NETWORK_NAME"; then
+  NETWORK_NAME="projectathlete_project-athlete-network"
+fi
+
 # Run migrations using a one-off container (doesn't start the app)
 echo -e "${BLUE}📦 Generating Prisma Client...${NC}"
 docker run --rm \
-  --network project-athlete_project-athlete-network \
+  --network "$NETWORK_NAME" \
   -e DATABASE_URL="postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-fitness_earley}?schema=public" \
   projectathlete-backend \
   sh -c "cd /app/packages/backend && npx prisma generate" || {
@@ -61,7 +70,7 @@ docker run --rm \
 echo ""
 echo -e "${BLUE}🔄 Running Prisma migrations...${NC}"
 docker run --rm \
-  --network project-athlete_project-athlete-network \
+  --network "$NETWORK_NAME" \
   -e DATABASE_URL="postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-fitness_earley}?schema=public" \
   projectathlete-backend \
   sh -c "cd /app/packages/backend && npx prisma migrate deploy" || {
