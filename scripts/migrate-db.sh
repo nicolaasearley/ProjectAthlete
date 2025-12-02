@@ -66,25 +66,23 @@ $DOCKER_COMPOSE_CMD run --rm --no-deps backend sh -c "cd /app/packages/backend &
 }
 
 echo ""
-echo -e "${BLUE}🔄 Running Prisma migrations...${NC}"
+echo -e "${BLUE}🔄 Setting up database schema...${NC}"
 
-# Check if migrations directory exists and has files
-MIGRATION_COUNT=$(docker run --rm --network project-athlete_project-athlete-network -v "$(pwd):/app" -w /app/packages/backend node:20-alpine sh -c "ls -1 prisma/migrations 2>/dev/null | wc -l" || echo "0")
-
-if [ "$MIGRATION_COUNT" = "0" ] || [ -z "$MIGRATION_COUNT" ]; then
-  echo -e "${YELLOW}⚠️  No migration files found. Creating initial migration...${NC}"
+# Check if migrations directory has any migration files
+if [ -d "packages/backend/prisma/migrations" ] && [ "$(ls -A packages/backend/prisma/migrations 2>/dev/null)" ]; then
+  echo -e "${BLUE}   Found migration files, running migrate deploy...${NC}"
+  $DOCKER_COMPOSE_CMD run --rm --no-deps backend sh -c "cd /app/packages/backend && npx prisma migrate deploy" || {
+    echo -e "${RED}❌ Migration failed${NC}"
+    exit 1
+  }
+else
+  echo -e "${YELLOW}⚠️  No migration files found. Creating schema from Prisma schema...${NC}"
   echo -e "${BLUE}   Using 'prisma db push' to create schema...${NC}"
   $DOCKER_COMPOSE_CMD run --rm --no-deps backend sh -c "cd /app/packages/backend && npx prisma db push --accept-data-loss" || {
     echo -e "${RED}❌ Failed to push schema${NC}"
     exit 1
   }
   echo -e "${GREEN}✅ Schema created successfully${NC}"
-else
-  echo -e "${BLUE}   Found existing migrations, running migrate deploy...${NC}"
-  $DOCKER_COMPOSE_CMD run --rm --no-deps backend sh -c "cd /app/packages/backend && npx prisma migrate deploy" || {
-    echo -e "${RED}❌ Migration failed${NC}"
-    exit 1
-  }
 fi
 
 echo ""
