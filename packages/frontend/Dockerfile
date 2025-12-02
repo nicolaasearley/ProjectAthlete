@@ -30,7 +30,6 @@ COPY packages/frontend/tsconfig.json packages/frontend/tsconfig.node.json packag
 COPY packages/frontend/tailwind.config.js packages/frontend/postcss.config.js packages/frontend/
 COPY packages/frontend/index.html packages/frontend/
 COPY packages/frontend/src packages/frontend/src
-COPY packages/frontend/public packages/frontend/public
 COPY packages/shared packages/shared
 
 # Build argument for API URL
