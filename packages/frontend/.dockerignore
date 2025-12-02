@@ -1,0 +1,31 @@
+# Build outputs
+dist
+build
+*.tsbuildinfo
+
+# Dependencies (will be installed in container)
+node_modules
+
+# Logs
+*.log
+
+# Environment (will be passed via Docker)
+.env
+.env.local
+
+# Tests
+test
+*.spec.ts
+*.test.ts
+
+# IDE
+.vscode
+.idea
+
+# Coverage
+coverage
+
+# Documentation
+*.md
+
+

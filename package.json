@@ -1,0 +1,32 @@
+{
+  "name": "fitness-earley-v2",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Fitness Earley v2 - Complete rebuild with modern architecture",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=packages/backend",
+    "dev:frontend": "npm run dev --workspace=packages/frontend",
+    "dev:worker": "npm run dev --workspace=packages/worker",
+    "build": "npm run build --workspaces",
+    "build:backend": "npm run build --workspace=packages/backend",
+    "build:frontend": "npm run build --workspace=packages/frontend",
+    "build:worker": "npm run build --workspace=packages/worker",
+    "lint": "npm run lint --workspaces",
+    "test": "npm run test --workspaces",
+    "clean": "npm run clean --workspaces && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
+}

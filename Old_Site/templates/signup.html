@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - ProjectAthlete</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="admin-login-header">
+        <div class="theme-selector">
+            <button class="theme-button" id="themeButton" aria-label="Select theme">
+                <span>🎨</span>
+                <span id="themeButtonText">Theme</span>
+            </button>
+            <div class="theme-menu" id="themeMenu">
+                        <button class="theme-option" data-theme="gold">
+                            <span class="theme-option-icon gold"></span>
+                            <span>Gold</span>
+                        </button>
+                        <button class="theme-option active" data-theme="light">
+                            <span class="theme-option-icon light"></span>
+                            <span>Light</span>
+                        </button>
+                <button class="theme-option" data-theme="dark">
+                    <span class="theme-option-icon dark"></span>
+                    <span>Dark</span>
+                </button>
+                <button class="theme-option" data-theme="blue">
+                    <span class="theme-option-icon blue"></span>
+                    <span>Blue</span>
+                </button>
+                <button class="theme-option" data-theme="pink">
+                    <span class="theme-option-icon pink"></span>
+                    <span>Pink</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <div class="login-container">
+        <h1 class="login-title">Create Account</h1>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" name="first_name" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" name="last_name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required minlength="6">
+            </div>
+            <div class="form-group" style="margin-top: 20px;">
+                <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="agreeEula" name="agree_eula" required style="margin-top: 4px; flex-shrink: 0;">
+                    <span style="font-size: 14px; line-height: 1.5;">
+                        I agree to the <a href="/eula" target="_blank" style="color: var(--primary-color); text-decoration: underline;">End User License Agreement</a> and consent to the collection and use of all my personal data for whatever purposes you want.
+                    </span>
+                </label>
+            </div>
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+            <div id="usernameDisplay" style="display: none; margin-top: 16px; padding: 16px; background-color: var(--group-bg); border-radius: 8px; border: 2px solid var(--selected-day);">
+                <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">Your Username:</div>
+                <div id="usernameValue" style="font-size: 18px; font-weight: 700; color: var(--selected-day); font-family: monospace;"></div>
+                <div style="font-size: 12px; margin-top: 8px; color: var(--text-secondary);">Please save this username - you'll need it to log in!</div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Sign Up</button>
+            <div style="text-align: center; margin-top: 16px;">
+                <a href="/admin/login" style="color: var(--text-secondary); text-decoration: none;">Already have an account? Login</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+</body>
+</html>
+

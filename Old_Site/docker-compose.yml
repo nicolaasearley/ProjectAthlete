@@ -1,0 +1,34 @@
+services:
+  fitness-programming:
+    build: .
+    container_name: fitness-programming
+    restart: unless-stopped
+    ports:
+      - "5001:5000"  # Map host port 5001 to container port 5000
+    volumes:
+      # Persist database and instance data
+      - ./instance:/app/instance
+      # Optional: mount logs if you add logging
+      - ./logs:/app/logs
+      # Mount code files for live editing (development)
+      - ./app.py:/app/app.py
+      - ./run.py:/app/run.py
+      - ./static:/app/static
+      - ./templates:/app/templates
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production-use-a-secure-random-string}
+      - DATABASE_URL=sqlite:///instance/workouts.db
+      - PORT=5000
+      - FLASK_DEBUG=False
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  default:
+    driver: bridge

@@ -1,0 +1,26 @@
+{
+  "name": "@fitness-earley/migration",
+  "version": "1.0.0",
+  "description": "Migration scripts for Fitness Earley v2",
+  "main": "scripts/migrate-workouts.js",
+  "scripts": {
+    "build": "tsc",
+    "prisma:generate": "cd ../packages/backend && npm run prisma:generate || prisma generate --schema=prisma/schema.prisma",
+    "migrate": "npm run prisma:generate && npx ts-node scripts/migrate-workouts.ts",
+    "migrate:dry-run": "npm run prisma:generate && npx ts-node scripts/migrate-workouts.ts --dry-run"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.8.1",
+    "dotenv": "^16.3.1",
+    "sql.js": "^1.10.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/sql.js": "^1.4.9",
+    "@types/uuid": "^9.0.7",
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectAthlete - Workout Programming</title>
+
+    <!-- App Icons / Favicons -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/app-icon.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/app-icon.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ProjectAthlete">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🏆</div>
+        </div>
+        <div class="header-text">ProjectAthlete</div>
+        <div class="header-actions">
+            {% if current_user %}
+            <button class="checkin-button" id="checkinButton" aria-label="Check In">
+                <i class="fa-solid fa-check"></i>
+                <span id="checkinButtonText">Check In</span>
+            </button>
+            {% endif %}
+            <button class="timer-button" id="timerButton" aria-label="Open Timer">
+                <i class="fa-solid fa-clock"></i>
+            </button>
+            <button class="menu-button" id="menuButton" aria-label="Open Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Menu Overlay -->
+    <div id="menuOverlay" class="menu-overlay">
+        <div class="menu-content">
+            <div class="menu-header">
+                <h2>Menu</h2>
+                <button class="menu-close" id="menuClose" aria-label="Close Menu">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <div class="menu-body">
+                {% if current_user %}
+                <!-- User Account Section -->
+                <div class="menu-section menu-account">
+                    <div class="menu-account-info">
+                        <div class="profile-icon-large" data-initials="{{ current_user.initials }}">{{
+                            current_user.initials }}</div>
+                        <div class="menu-account-details">
+                            <div class="menu-account-name">
+                                {% if current_user.first_name and current_user.last_name %}
+                                {{ current_user.first_name }} {{ current_user.last_name }}
+                                {% else %}
+                                {{ current_user.username }}
+                                {% endif %}
+                            </div>
+                            <div class="menu-account-role">{{ current_user.role|title }}</div>
+                        </div>
+                    </div>
+                    <a href="/user/profile" class="menu-item">
+                        <i class="fa-solid fa-user"></i>
+                        <span>My Profile</span>
+                    </a>
+                    <a href="/user/profile/logged-lifts" class="menu-item">
+                        <i class="fa-solid fa-dumbbell"></i>
+                        <span>My Logged Lifts</span>
+                    </a>
+                    <a href="/user/profile/checkins" class="menu-item">
+                        <i class="fa-solid fa-check"></i>
+                        <span>My Check-Ins</span>
+                    </a>
+                    <a href="/user/profile/my-workouts" class="menu-item">
+                        <i class="fa-solid fa-dumbbell"></i>
+                        <span>My Workouts</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Theme Selector -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Theme</div>
+                    <div class="menu-theme-options">
+                        <button class="menu-theme-option" data-theme="gold">
+                            <span class="theme-option-icon gold"></span>
+                            <span>Gold</span>
+                        </button>
+                        <button class="menu-theme-option active" data-theme="light">
+                            <span class="theme-option-icon light"></span>
+                            <span>Light</span>
+                        </button>
+                        <button class="menu-theme-option" data-theme="dark">
+                            <span class="theme-option-icon dark"></span>
+                            <span>Dark</span>
+                        </button>
+                        <button class="menu-theme-option" data-theme="blue">
+                            <span class="theme-option-icon blue"></span>
+                            <span>Blue</span>
+                        </button>
+                        <button class="menu-theme-option" data-theme="pink">
+                            <span class="theme-option-icon pink"></span>
+                            <span>Pink</span>
+                        </button>
+                    </div>
+                </div>
+
+                {% if current_user and (current_user.is_admin or current_user.is_coach) %}
+                <!-- Admin Menu -->
+                <div class="menu-section">
+                    <div class="menu-section-title">Admin</div>
+                    <a href="/admin" class="menu-item">
+                        <i class="fa-solid fa-dumbbell"></i>
+                        <span>Workout Dashboard</span>
+                    </a>
+                    <a href="/admin/users" class="menu-item">
+                        <i class="fa-solid fa-users"></i>
+                        <span>User Management</span>
+                    </a>
+                    <a href="/murph/log" class="menu-item">
+                        <i class="fa-solid fa-person-running"></i>
+                        <span>Log Murph</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Legal -->
+                <div class="menu-section">
+                    <a href="/eula" class="menu-item">
+                        <span style="font-size: 20px;">🖕</span>
+                        <span>EULA</span>
+                    </a>
+                </div>
+
+                <!-- Login/Logout -->
+                <div class="menu-section menu-footer">
+                    {% if current_user %}
+                    <a href="/admin/logout" class="menu-item menu-item-logout">
+                        <i class="fa-solid fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                    {% else %}
+                    <a href="/admin/login" class="menu-item">
+                        <i class="fa-solid fa-sign-in-alt"></i>
+                        <span>Login</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="workout-selector">
+            <div class="workout-input" id="workoutInput" onclick="toggleWorkoutSelector()">
+                <span class="clipboard-icon">📋</span>
+                <span id="workoutName" class="workout-name-display"></span>
+                <i class="fa-solid fa-chevron-down workout-selector-arrow" id="workoutSelectorArrow"></i>
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="days-header">
+                <span>Sun</span>
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+            </div>
+            <div class="swiper calendar-swiper">
+                <div class="swiper-wrapper" id="calendarWrapper">
+                    <!-- Calendar weeks will be dynamically generated -->
+                </div>
+            </div>
+            <div class="calendar-indicator">▼</div>
+        </div>
+
+        <div class="workout-display" id="workoutDisplay">
+            <div class="empty-state">
+                <div class="emoji">🤘</div>
+                <div class="empty-message">
+                    <strong>No training planned (yet)</strong>
+                    <p>Have fun, enjoy your day!</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="exportButtonContainer"
+            style="display: none; text-align: center; margin-top: 24px; padding-bottom: 24px;">
+            <button id="exportWorkoutBtn" class="btn btn-primary">
+                <i class="fa-solid fa-download"></i> Export Workout
+            </button>
+        </div>
+    </main>
+
+    <!-- 1RM Calculator Modal -->
+    <div id="1rmModal" class="modal-1rm">
+        <div class="modal-1rm-content">
+            <div class="modal-1rm-header">
+                <h3 id="modalExerciseName">1RM Calculator</h3>
+                <button class="modal-1rm-close" onclick="close1RMCalculator()" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-1rm-body">
+                <div class="modal-1rm-input-section">
+                    <label for="1rmInput">Enter your 1 Rep Max (lbs):</label>
+                    <input type="number" id="1rmInput" placeholder="e.g., 225" min="0" step="0.5"
+                        oninput="calculate1RMPercentages()">
+                </div>
+                <div id="1rmResults" class="modal-1rm-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gym Timer Modal -->
+    <div id="timerModal" class="modal-timer">
+        <div class="modal-timer-content">
+            <div class="modal-timer-header">
+                <h3><i class="fa-solid fa-clock"></i> Gym Timer</h3>
+                <button class="modal-timer-close" onclick="closeTimer()" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-timer-body">
+                <div class="timer-mode-selector">
+                    <button class="timer-mode-btn active" data-mode="simple">Simple Timer</button>
+                    <button class="timer-mode-btn" data-mode="interval">Interval Timer</button>
+                </div>
+
+                <!-- Simple Timer Mode -->
+                <div id="simpleTimer" class="timer-mode-content active">
+                    <div class="timer-display">
+                        <div class="timer-time" id="simpleTimerDisplay">00:00</div>
+                        <div class="timer-controls">
+                            <button class="timer-btn" id="startPauseBtn" onclick="startPauseTimer()">
+                                <i class="fa-solid fa-play"></i> Start
+                            </button>
+                            <button class="timer-btn" id="resetBtn" onclick="resetTimer()">
+                                <i class="fa-solid fa-rotate-right"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="timer-settings">
+                        <div class="timer-setting">
+                            <label>Set Time (minutes:seconds)</label>
+                            <div class="time-input-group">
+                                <input type="number" id="timerMinutes" min="0" max="59" value="0" placeholder="MM">
+                                <span>:</span>
+                                <input type="number" id="timerSeconds" min="0" max="59" value="30" placeholder="SS">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interval Timer Mode -->
+                <div id="intervalTimer" class="timer-mode-content">
+                    <div class="timer-display">
+                        <div class="timer-status" id="intervalStatus">Ready</div>
+                        <div class="timer-time" id="intervalTimerDisplay">00:00</div>
+                        <div class="timer-round" id="intervalRound">Round 1 / 1</div>
+                        <div class="timer-controls">
+                            <button class="timer-btn" id="startPauseIntervalBtn" onclick="startPauseIntervalTimer()">
+                                <i class="fa-solid fa-play"></i> Start
+                            </button>
+                            <button class="timer-btn" id="resetIntervalBtn" onclick="resetIntervalTimer()">
+                                <i class="fa-solid fa-rotate-right"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="timer-settings">
+                        <div class="timer-setting">
+                            <label>Work Time (seconds)</label>
+                            <input type="number" id="workTime" min="1" value="30" placeholder="30">
+                        </div>
+                        <div class="timer-setting">
+                            <label>Rest Time (seconds)</label>
+                            <input type="number" id="restTime" min="0" value="10" placeholder="10">
+                        </div>
+                        <div class="timer-setting">
+                            <label>Number of Rounds</label>
+                            <input type="number" id="numRounds" min="1" value="1" placeholder="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weight Logging Modal -->
+    <div id="weightLoggingModal" class="modal-weight-logging">
+        <div class="modal-weight-logging-content">
+            <div class="modal-weight-logging-header">
+                <h3 class="modal-weight-logging-title">Log Weight</h3>
+                <button class="modal-weight-logging-close" onclick="closeWeightLoggingModal()"
+                    aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-weight-logging-body">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="modal-leaderboard">
+        <div class="modal-leaderboard-content">
+            <div class="modal-leaderboard-header">
+                <h3 class="modal-leaderboard-title">Leaderboard</h3>
+                <button class="modal-leaderboard-close" onclick="closeLeaderboardModal()"
+                    aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-leaderboard-body">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-In Modal -->
+    <div id="checkinModal" class="modal-checkin">
+        <div class="modal-checkin-content">
+            <div class="modal-checkin-header">
+                <h3 class="modal-checkin-title">Daily Check-In</h3>
+                <button class="modal-checkin-close" onclick="closeCheckInModal()" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-checkin-body">
+                <div id="checkinError" class="error-message" style="display: none;"></div>
+                <div id="checkinSuccess" class="success-message" style="display: none;"></div>
+                <div class="checkin-form">
+                    <div class="form-group">
+                        <label for="checkinNotes">Notes (optional):</label>
+                        <textarea id="checkinNotes" placeholder="How are you feeling today? Any goals?" rows="4"
+                            maxlength="500"></textarea>
+                    </div>
+                    <div class="checkin-actions">
+                        <button class="btn btn-primary" onclick="submitCheckIn()">Check In</button>
+                        <button class="btn btn-secondary" onclick="closeCheckInModal()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/1rm-calculator.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gym-timer.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/weight-logging.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/checkin.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

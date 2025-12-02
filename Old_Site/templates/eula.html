@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>End User License Agreement - ProjectAthlete</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .eula-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 40px 20px;
+        }
+        .eula-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .eula-emoji {
+            font-size: 120px;
+            line-height: 1;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .eula-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+        .eula-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        .eula-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+        .eula-section {
+            margin-bottom: 30px;
+        }
+        .eula-section h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        .eula-section p {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .eula-section ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .eula-section li {
+            margin-bottom: 10px;
+        }
+        .eula-highlight {
+            background: var(--group-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        .eula-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid var(--border-color);
+        }
+        .eula-back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .eula-back-link:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="eula-container">
+        <div class="eula-header">
+            <span class="eula-emoji">🖕</span>
+            <h1 class="eula-title">End User License Agreement</h1>
+            <p class="eula-subtitle">Because lawyers are expensive and we're not lawyers</p>
+        </div>
+
+        <div class="eula-content">
+            <div class="eula-section">
+                <h2>1. The "We Own You" Clause</h2>
+                <p>By signing up for this service, you hereby agree that we can collect, store, use, sell, trade, or do whatever the heck we want with ALL of your personal data. This includes but is not limited to:</p>
+                <ul>
+                    <li>Your name, email, phone number, and any other identifying information</li>
+                    <li>Your workout data, exercise logs, and fitness progress</li>
+                    <li>Your browsing habits, click patterns, and how long you stare at certain exercises</li>
+                    <li>Your deepest, darkest fitness secrets (yes, we know you skip leg day)</li>
+                    <li>Your firstborn child (just kidding... maybe)</li>
+                </ul>
+            </div>
+
+            <div class="eula-section">
+                <h2>2. Data Usage Rights</h2>
+                <p>We reserve the right to use your data for:</p>
+                <ul>
+                    <li>Making our app better (or worse, we're not making promises)</li>
+                    <li>Selling to third parties (because money is nice)</li>
+                    <li>Creating weird AI models that predict your next workout</li>
+                    <li>Posting embarrassing workout fails on social media (with your permission... or without it, who knows?)</li>
+                    <li>Literally anything else we can think of</li>
+                </ul>
+            </div>
+
+            <div class="eula-section">
+                <h2>3. The "No Takebacks" Policy</h2>
+                <p>Once you've signed up, there's no going back. Your data is ours now. Forever. Even if you delete your account, we'll probably keep it somewhere "just in case." You can't sue us, you can't complain, and you definitely can't get your data back. It's gone. Poof. Like magic, but less fun.</p>
+            </div>
+
+            <div class="eula-section">
+                <h2>4. Liability Disclaimer</h2>
+                <p>We're not responsible for:</p>
+                <ul>
+                    <li>Injuries sustained while following our workouts (you should've known better)</li>
+                    <li>Data breaches (hackers are sneaky, what can we do?)</li>
+                    <li>Your gym membership fees going up because you're too strong now</li>
+                    <li>Your significant other leaving you because you spend too much time logging workouts</li>
+                    <li>Basically anything bad that happens to you, ever</li>
+                </ul>
+            </div>
+
+            <div class="eula-section">
+                <h2>5. The Fine Print</h2>
+                <p>This agreement is legally binding, probably. We wrote it ourselves without consulting a lawyer, so it might not hold up in court. But hey, you agreed to it, so that's on you. If you don't like it, don't use our service. Simple as that.</p>
+            </div>
+
+            <div class="eula-highlight">
+                <strong>TL;DR:</strong> By signing up, you're giving us permission to do whatever we want with your data. We're not responsible for anything. You can't sue us. Have a nice day! 🖕
+            </div>
+
+            <div class="eula-footer">
+                <p style="font-size: 14px; color: var(--text-secondary);">
+                    Last updated: Never (we don't update these things)<br>
+                    Version: 1.0 (The Only Version)<br>
+                    Legal validity: Questionable at best
+                </p>
+                <a href="/signup" class="eula-back-link">Back to Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+</html>
+

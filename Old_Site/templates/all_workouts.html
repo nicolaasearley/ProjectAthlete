@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Previous Workouts - ProjectAthlete</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">All Previous Workouts</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="/admin/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+
+        <div id="workoutsList" class="workouts-list-all">
+            <p>Loading workouts...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/all_workouts.js') }}"></script>
+</body>
+</html>
+

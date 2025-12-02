@@ -1,0 +1,417 @@
+// Fitness Earley v2 - Complete Prisma Schema
+// Generated with comprehensive data model
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum Role {
+  USER
+  COACH
+  ADMIN
+}
+
+enum WorkoutType {
+  PERSONAL
+  COMMUNITY
+}
+
+enum Privacy {
+  PUBLIC
+  PRIVATE
+  FRIENDS_ONLY
+}
+
+enum StorageProvider {
+  LOCAL
+  S3
+  MINIO
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  FIRE
+  THUMBS_UP
+  CELEBRATE
+}
+
+enum ReactionTargetType {
+  POST
+  COMMENT
+}
+
+enum ChallengeMetricType {
+  TIME
+  REPS
+  WEIGHT
+  DISTANCE
+  CUMULATIVE
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  FLAGGED
+  REMOVED
+}
+
+enum OAuthProvider {
+  GOOGLE
+  APPLE
+}
+
+enum NotificationType {
+  COMMENT
+  REACTION
+  CHALLENGE_UPDATE
+  COACH_ANNOUNCEMENT
+  WORKOUT_ASSIGNED
+}
+
+enum AnalyticsEventType {
+  USER_REGISTERED
+  USER_LOGGED_IN
+  WORKOUT_CREATED
+  WORKOUT_COMPLETED
+  CHALLENGE_ENTRY
+  POST_CREATED
+  COMMENT_CREATED
+  REACTION_CREATED
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model User {
+  id                      String    @id @default(uuid())
+  email                   String    @unique @db.VarChar(255)
+  passwordHash            String?   @map("password_hash") @db.VarChar(255)
+  displayName             String?   @map("display_name") @db.VarChar(255)
+  firstName               String?   @map("first_name") @db.VarChar(100)
+  lastName                String?   @map("last_name") @db.VarChar(100)
+  role                    Role      @default(USER)
+  emailVerified           Boolean   @default(false) @map("email_verified")
+  emailVerificationToken  String?   @unique @map("email_verification_token") @db.VarChar(255)
+  profilePicturePath      String?   @map("profile_picture_path") @db.VarChar(500)
+  lastActive              DateTime? @map("last_active") @db.Timestamptz(6)
+  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt               DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  // Relations
+  oauthTokens             OAuthToken[]
+  workouts                Workout[]
+  workoutRuns             WorkoutRun[]
+  weightLogs              WeightLog[]
+  posts                   Post[]
+  comments                Comment[]
+  reactions               Reaction[]
+  challenges              Challenge[]        @relation("ChallengeCoach")
+  challengeEntries        ChallengeEntry[]
+  notifications           Notification[]
+  mediaFiles              MediaFile[]
+
+  @@index([email])
+  @@index([role])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model OAuthToken {
+  id              String        @id @default(uuid())
+  userId          String        @map("user_id")
+  provider        OAuthProvider
+  providerUserId  String        @map("provider_user_id") @db.VarChar(255)
+  accessToken     String        @map("access_token") @db.Text
+  refreshToken    String?       @map("refresh_token") @db.Text
+  expiresAt       DateTime?     @map("expires_at") @db.Timestamptz(6)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@index([provider])
+  @@map("oauth_tokens")
+}
+
+model Workout {
+  id                  String      @id @default(uuid())
+  ownerUserId         String?     @map("owner_user_id")
+  title               String      @db.VarChar(200)
+  description         String?     @db.Text
+  type                WorkoutType @default(PERSONAL)
+  exercises           Json        // Structured exercise array
+  estimatedTimeMinutes Int?       @map("estimated_time_minutes")
+  tags                String[]    @default([])
+  notes               String?     @db.Text
+  isTemplate          Boolean     @default(false) @map("is_template")
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime?   @map("deleted_at") @db.Timestamptz(6)
+
+  // Relations
+  owner               User?       @relation(fields: [ownerUserId], references: [id], onDelete: SetNull)
+  workoutRuns         WorkoutRun[]
+
+  @@index([ownerUserId])
+  @@index([type])
+  @@index([deletedAt])
+  @@map("workouts")
+}
+
+model Exercise {
+  id            String   @id @default(uuid())
+  name          String   @unique @db.VarChar(200)
+  description   String?  @db.Text
+  category      String?  @db.VarChar(50) // STRENGTH, CARDIO, MOBILITY, etc.
+  defaultMetrics Json?   @map("default_metrics") // Supports weight/reps/time/distance
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  weightLogs    WeightLog[]
+
+  @@index([name])
+  @@index([category])
+  @@map("exercises")
+}
+
+model WorkoutRun {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  workoutId       String    @map("workout_id")
+  date            DateTime  @db.Date
+  startedAt       DateTime? @map("started_at") @db.Timestamptz(6)
+  completedAt     DateTime? @map("completed_at") @db.Timestamptz(6)
+  results         Json?     // Exercise results structure
+  notes           String?   @db.Text
+  totalTimeSeconds Int?     @map("total_time_seconds")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workout         Workout   @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  weightLogs      WeightLog[]
+
+  @@index([userId])
+  @@index([workoutId])
+  @@index([date])
+  @@map("workout_runs")
+}
+
+model WeightLog {
+  id            String     @id @default(uuid())
+  userId        String     @map("user_id")
+  exerciseId    String?    @map("exercise_id")
+  workoutRunId  String?    @map("workout_run_id")
+  weight        Decimal?   @db.Decimal(10, 2)
+  reps          Int?
+  sets          Int?
+  date          DateTime   @db.Date
+  notes         String?    @db.Text
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise      Exercise?  @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+  workoutRun    WorkoutRun? @relation(fields: [workoutRunId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([exerciseId])
+  @@index([workoutRunId])
+  @@index([date])
+  @@map("weight_logs")
+}
+
+model Post {
+  id                String            @id @default(uuid())
+  userId            String            @map("user_id")
+  text              String            @db.Text
+  mediaPaths        String[]          @default([]) @map("media_paths")
+  privacy           Privacy           @default(PUBLIC)
+  exerciseTags      String[]          @default([]) @map("exercise_tags")
+  location          String?           @db.VarChar(255)
+  isPinned          Boolean           @default(false) @map("is_pinned")
+  moderationStatus  ModerationStatus  @default(APPROVED) @map("moderation_status")
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime?         @map("deleted_at") @db.Timestamptz(6)
+
+  // Relations
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments          Comment[]
+
+  @@index([userId])
+  @@index([privacy])
+  @@index([moderationStatus])
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+model MediaFile {
+  id              String          @id @default(uuid())
+  userId          String?         @map("user_id")
+  filename        String          @db.VarChar(255)
+  originalFilename String         @map("original_filename") @db.VarChar(255)
+  mimeType        String          @map("mime_type") @db.VarChar(100)
+  fileSizeBytes   BigInt          @map("file_size_bytes")
+  storagePath     String          @map("storage_path") @db.VarChar(1000)
+  publicUrlPath   String          @map("public_url_path") @db.VarChar(500)
+  thumbnailPath   String?         @map("thumbnail_path") @db.VarChar(1000)
+  width           Int?
+  height          Int?
+  durationSeconds Int?            @map("duration_seconds")
+  storageProvider StorageProvider @default(LOCAL) @map("storage_provider")
+  checksumMd5     String?         @map("checksum_md5") @db.VarChar(32)
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([storageProvider])
+  @@index([createdAt])
+  @@map("media_files")
+}
+
+model Comment {
+  id                String            @id @default(uuid())
+  postId            String            @map("post_id")
+  userId            String            @map("user_id")
+  text              String            @db.Text
+  parentCommentId   String?           @map("parent_comment_id")
+  moderationStatus  ModerationStatus  @default(APPROVED) @map("moderation_status")
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime?         @map("deleted_at") @db.Timestamptz(6)
+
+  // Relations
+  post              Post              @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentComment     Comment?          @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies           Comment[]         @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([userId])
+  @@index([parentCommentId])
+  @@index([deletedAt])
+  @@map("comments")
+}
+
+model Reaction {
+  id            String            @id @default(uuid())
+  userId        String            @map("user_id")
+  targetType    ReactionTargetType @map("target_type")
+  targetId      String            @map("target_id")
+  reactionType  ReactionType      @map("reaction_type")
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@index([userId])
+  @@map("reactions")
+}
+
+model Challenge {
+  id          String              @id @default(uuid())
+  coachId     String              @map("coach_id")
+  title       String              @db.VarChar(200)
+  description String?             @db.Text
+  metricType  ChallengeMetricType @map("metric_type")
+  startAt     DateTime            @map("start_at") @db.Timestamptz(6)
+  endAt       DateTime            @map("end_at") @db.Timestamptz(6)
+  targetValue Decimal?            @map("target_value") @db.Decimal(10, 2)
+  isActive    Boolean             @default(true) @map("is_active")
+  createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  coach       User                @relation("ChallengeCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  entries     ChallengeEntry[]
+
+  @@index([coachId])
+  @@index([isActive])
+  @@index([startAt, endAt])
+  @@map("challenges")
+}
+
+model ChallengeEntry {
+  id          String    @id @default(uuid())
+  challengeId String    @map("challenge_id")
+  userId      String    @map("user_id")
+  value       Decimal   @db.Decimal(10, 2)
+  date        DateTime  @db.Date
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Removed unique constraint to allow multiple entries per day
+  // Entries are consolidated in leaderboard calculations
+  @@index([challengeId])
+  @@index([userId])
+  @@index([date])
+  @@map("challenge_entries")
+}
+
+model Notification {
+  id                  String            @id @default(uuid())
+  userId              String            @map("user_id")
+  type                NotificationType
+  title               String            @db.VarChar(255)
+  message             String            @db.Text
+  relatedEntityType   String?           @map("related_entity_type") @db.VarChar(50)
+  relatedEntityId     String?           @map("related_entity_id")
+  isRead              Boolean           @default(false) @map("is_read")
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model AnalyticsEvent {
+  id          String              @id @default(uuid())
+  eventType   AnalyticsEventType  @map("event_type")
+  userId      String?             @map("user_id")
+  entityType  String?             @map("entity_type") @db.VarChar(50)
+  entityId    String?             @map("entity_id")
+  metadata    Json?               // Additional event data
+  ipAddress   String?             @map("ip_address") @db.VarChar(45)
+  userAgent   String?             @map("user_agent") @db.VarChar(500)
+  createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([eventType])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@map("analytics_events")
+}

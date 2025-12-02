@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production builds
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+.docker/
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Uploads and media (keep structure, ignore contents)
+data/uploads/**/*
+!data/uploads/.gitkeep
+data/backups/**/*
+!data/backups/.gitkeep
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Prisma
+packages/backend/prisma/migrations/.gitkeep
+
+# Backup files
+*.backup
+*.bak
+
+# OS
+Thumbs.db
+.DS_Store
+

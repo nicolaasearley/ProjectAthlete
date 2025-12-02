@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - ProjectAthlete</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">My Profile</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="theme-selector">
+                    <button class="theme-button" id="themeButton" aria-label="Select theme">
+                        <span>🎨</span>
+                        <span id="themeButtonText">Theme</span>
+                    </button>
+                    <div class="theme-menu" id="themeMenu">
+                        <button class="theme-option" data-theme="gold">
+                            <span class="theme-option-icon gold"></span>
+                            <span>Gold</span>
+                        </button>
+                        <button class="theme-option active" data-theme="light">
+                            <span class="theme-option-icon light"></span>
+                            <span>Light</span>
+                        </button>
+                        <button class="theme-option" data-theme="dark">
+                            <span class="theme-option-icon dark"></span>
+                            <span>Dark</span>
+                        </button>
+                        <button class="theme-option" data-theme="blue">
+                            <span class="theme-option-icon blue"></span>
+                            <span>Blue</span>
+                        </button>
+                        <button class="theme-option" data-theme="pink">
+                            <span class="theme-option-icon pink"></span>
+                            <span>Pink</span>
+                        </button>
+                    </div>
+                </div>
+                <a href="/" class="btn btn-secondary">View Public Site</a>
+                <a href="/admin/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+
+        <!-- Profile Navigation Tabs -->
+        <div class="profile-nav">
+            <a href="/user/profile" class="profile-nav-item {% if page == 'profile' %}active{% endif %}">
+                My Profile
+            </a>
+            <a href="/user/profile/logged-lifts" class="profile-nav-item {% if page == 'logged-lifts' %}active{% endif %}">
+                My Logged Lifts
+            </a>
+            <a href="/user/profile/checkins" class="profile-nav-item {% if page == 'checkins' %}active{% endif %}">
+                My Check-Ins
+            </a>
+            <a href="/user/profile/my-workouts" class="profile-nav-item {% if page == 'my-workouts' %}active{% endif %}">
+                My Workouts
+            </a>
+        </div>
+
+        <!-- Profile Page Content -->
+        <div id="profilePageContent" class="profile-page-content" {% if page != 'profile' %}style="display: none;"{% endif %}>
+            <div id="userProfileEditor" class="workout-editor">
+                <div class="editor-header">
+                    <h2>Edit Profile</h2>
+                </div>
+                <form id="profileForm">
+                    <div id="editorError" class="error-message" style="display: none;"></div>
+                    <div id="editorSuccess" class="success-message" style="display: none;"></div>
+                    
+                    <div class="form-group">
+                        <label>Username:</label>
+                        <div class="readonly-field" id="usernameDisplay"></div>
+                        <small class="form-hint">Username cannot be changed</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="firstNameInput">First Name:</label>
+                        <input type="text" id="firstNameInput" name="first_name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastNameInput">Last Name:</label>
+                        <input type="text" id="lastNameInput" name="last_name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currentPasswordInput">Current Password:</label>
+                        <input type="password" id="currentPasswordInput" name="current_password" placeholder="Required to change password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPasswordInput">New Password:</label>
+                        <input type="password" id="newPasswordInput" name="new_password" placeholder="Leave blank to keep current password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPasswordInput">Confirm New Password:</label>
+                        <input type="password" id="confirmPasswordInput" name="confirm_password" placeholder="Leave blank to keep current password">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Logged Lifts Page Content -->
+        <div id="loggedLiftsPageContent" class="profile-page-content" {% if page != 'logged-lifts' %}style="display: none;"{% endif %}>
+            <div id="loggedWeightsSection" class="logged-weights-section">
+                <div class="logged-lifts-header">
+                    <h2>My Logged Lifts</h2>
+                    <div class="logged-lifts-filter">
+                        <label for="exerciseFilter">Filter by Exercise:</label>
+                        <select id="exerciseFilter" class="exercise-filter-select">
+                            <option value="">All Exercises</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="loggedWeightsList" class="logged-weights-list">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Check-Ins Page Content -->
+        <div id="checkinsPageContent" class="profile-page-content" {% if page != 'checkins' %}style="display: none;"{% endif %}>
+            <div id="checkinsSection" class="checkins-section">
+                <div class="checkins-header">
+                    <h2>My Check-Ins</h2>
+                    <div id="checkinStreak" class="checkin-streak-display">
+                        <span class="streak-label">Current Streak:</span>
+                        <span id="streakValue" class="streak-value">0 days</span>
+                    </div>
+                </div>
+                <div id="checkinsList" class="checkins-list">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- My Workouts Page Content -->
+        <div id="myWorkoutsPageContent" class="profile-page-content" {% if page != 'my-workouts' %}style="display: none;"{% endif %}>
+            <div id="userWorkoutsSection" class="user-workouts-section">
+                <div class="user-workouts-header">
+                    <h2>My Workouts</h2>
+                    <button class="btn btn-primary" onclick="openUserWorkoutEditor(null)">
+                        <i class="fa-solid fa-plus"></i> Create New Workout
+                    </button>
+                </div>
+                <div id="userWorkoutsList" class="user-workouts-list">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user_profile.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user_workouts.js') }}"></script>
+</body>
+</html>
+

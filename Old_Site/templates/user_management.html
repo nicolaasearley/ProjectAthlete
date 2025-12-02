@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - ProjectAthlete</title>
+    <meta name="user-role" content="{{ user_role }}">
+    <meta name="is-admin" content="{{ 'true' if is_admin else 'false' }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">User Management</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="theme-selector">
+                    <button class="theme-button" id="themeButton" aria-label="Select theme">
+                        <span>🎨</span>
+                        <span id="themeButtonText">Theme</span>
+                    </button>
+                    <div class="theme-menu" id="themeMenu">
+                        <button class="theme-option" data-theme="gold">
+                            <span class="theme-option-icon gold"></span>
+                            <span>Gold</span>
+                        </button>
+                        <button class="theme-option active" data-theme="light">
+                            <span class="theme-option-icon light"></span>
+                            <span>Light</span>
+                        </button>
+                        <button class="theme-option" data-theme="dark">
+                            <span class="theme-option-icon dark"></span>
+                            <span>Dark</span>
+                        </button>
+                        <button class="theme-option" data-theme="blue">
+                            <span class="theme-option-icon blue"></span>
+                            <span>Blue</span>
+                        </button>
+                        <button class="theme-option" data-theme="pink">
+                            <span class="theme-option-icon pink"></span>
+                            <span>Pink</span>
+                        </button>
+                    </div>
+                </div>
+                <a href="/admin" class="btn btn-secondary">Dashboard</a>
+                <a href="/" class="btn btn-secondary">View Public Site</a>
+                <a href="/admin/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+
+        <button id="newUserBtn" class="btn btn-primary">+ New User</button>
+
+        <div id="userEditor" class="workout-editor" style="display: none;">
+            <div class="editor-header">
+                <h2 id="editorTitle">New User</h2>
+                <button id="closeEditorBtn" class="btn btn-secondary">Close</button>
+            </div>
+            <form id="userForm">
+                <div id="editorError" class="error-message" style="display: none;"></div>
+                
+                <div class="form-group">
+                    <label for="usernameInput">Username:</label>
+                    <input type="text" id="usernameInput" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="firstNameInput">First Name:</label>
+                    <input type="text" id="firstNameInput" name="first_name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="lastNameInput">Last Name:</label>
+                    <input type="text" id="lastNameInput" name="last_name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="passwordInput">Password:</label>
+                    <input type="password" id="passwordInput" name="password">
+                    <small id="passwordHint" style="color: var(--text-secondary);">Leave blank to keep current password when editing</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="roleSelect">Role:</label>
+                    <select id="roleSelect" name="role" required>
+                        <option value="user">User</option>
+                        {% if is_admin %}
+                        <option value="coach">Coach</option>
+                        <option value="admin">Admin</option>
+                        {% endif %}
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Save User</button>
+            </form>
+        </div>
+
+        <div id="usersList" class="workout-list"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user_management.js') }}"></script>
+</body>
+</html>
+

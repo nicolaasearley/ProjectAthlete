@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="current-user-id" content="{{ current_user.id if current_user.is_authenticated else '' }}">
+    <meta name="current-user-type" content="{{ current_user_type if current_user.is_authenticated else '' }}">
+    <title>Admin Dashboard - ProjectAthlete</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">Workout Programming</h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="theme-selector">
+                    <button class="theme-button" id="themeButton" aria-label="Select theme">
+                        <span>🎨</span>
+                        <span id="themeButtonText">Theme</span>
+                    </button>
+                    <div class="theme-menu" id="themeMenu">
+                        <button class="theme-option" data-theme="gold">
+                            <span class="theme-option-icon gold"></span>
+                            <span>Gold</span>
+                        </button>
+                        <button class="theme-option active" data-theme="light">
+                            <span class="theme-option-icon light"></span>
+                            <span>Light</span>
+                        </button>
+                        <button class="theme-option" data-theme="dark">
+                            <span class="theme-option-icon dark"></span>
+                            <span>Dark</span>
+                        </button>
+                        <button class="theme-option" data-theme="blue">
+                            <span class="theme-option-icon blue"></span>
+                            <span>Blue</span>
+                        </button>
+                        <button class="theme-option" data-theme="pink">
+                            <span class="theme-option-icon pink"></span>
+                            <span>Pink</span>
+                        </button>
+                    </div>
+                </div>
+                <a href="/" class="btn btn-secondary">View Public Site</a>
+                <a href="/admin/users" class="btn btn-secondary">User Management</a>
+                <a href="/admin/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+            <button id="newWorkoutBtn" class="btn btn-primary">+ New Workout</button>
+            <button id="generateWeekBtn" class="btn btn-secondary">Generate Week from Template</button>
+        </div>
+
+        <!-- Generate Week Modal -->
+        <div id="generateWeekModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Generate Week from Template</h2>
+                    <button id="closeGenerateWeekModal" class="btn btn-secondary">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Reference Week (Template)</label>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <input type="date" id="referenceStartDate" required>
+                            <span>to</span>
+                            <input type="date" id="referenceEndDate" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Week (New Workouts)</label>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <input type="date" id="targetStartDate" required>
+                            <span>to</span>
+                            <input type="date" id="targetEndDate" required>
+                        </div>
+                    </div>
+                    <div id="generateWeekError" class="error-message" style="display: none;"></div>
+                    <div id="generateWeekSuccess" class="success-message" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="generateWeekSubmitBtn" class="btn btn-primary">Generate Workouts</button>
+                    <button id="cancelGenerateWeekBtn" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="workoutEditor" class="workout-editor" style="display: none;">
+            <div class="editor-header">
+                <h2 id="editorTitle">New Workout</h2>
+                <button id="closeEditorBtn" class="btn btn-secondary">Close</button>
+            </div>
+            <form id="workoutForm">
+                <div class="form-group">
+                    <label for="workoutDate">Date</label>
+                    <div class="date-input-wrapper">
+                        <input type="date" id="workoutDate" name="date" required>
+                        <span class="date-display" id="dateDisplay"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="workoutNameInput">Workout Name</label>
+                    <input type="text" id="workoutNameInput" name="workout_name" placeholder="Enter workout name" required>
+                </div>
+                <div class="form-group">
+                    <label for="workoutCreatorSelect">Created By:</label>
+                    <select id="workoutCreatorSelect" name="created_by" required>
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Workout Structure</label>
+                    <div id="workoutStructure" class="workout-structure"></div>
+                    <div style="margin-top: 12px; display: flex; gap: 8px;">
+                        <button type="button" id="addExerciseBtn" class="btn btn-secondary">+ Add Exercise</button>
+                        <button type="button" id="addGroupBtn" class="btn btn-secondary">+ Add Exercise Group</button>
+                    </div>
+                </div>
+                <div id="editorError" class="error-message" style="display: none;"></div>
+                <button type="submit" class="btn btn-primary">Save Workout</button>
+            </form>
+        </div>
+
+        <div id="workoutsList" class="workout-grid"></div>
+
+        <!-- Check-Ins Section -->
+        <div id="checkinsSection" class="checkins-admin-section" style="margin-top: 40px;">
+            <div class="checkins-admin-header">
+                <h2>Check-Ins</h2>
+                <div class="checkins-admin-filters">
+                    <input type="date" id="checkinStartDate" class="date-filter">
+                    <span>to</span>
+                    <input type="date" id="checkinEndDate" class="date-filter">
+                    <button id="filterCheckinsBtn" class="btn btn-secondary">Filter</button>
+                    <button id="refreshCheckinsBtn" class="btn btn-secondary">Refresh</button>
+                </div>
+            </div>
+            
+            <!-- Statistics Widget -->
+            <div id="checkinStats" class="checkin-stats-widget">
+                <!-- Stats will be loaded dynamically -->
+            </div>
+            
+            <!-- Check-Ins Table -->
+            <div id="checkinsTable" class="checkins-table-container">
+                <!-- Table will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin_checkins.js') }}"></script>
+</body>
+</html>
+
+

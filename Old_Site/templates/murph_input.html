@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Murph Log</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/app-icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #00ff88;
+            /* Neon Green */
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaaaaa;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #00ff88;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background-color: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #00cc6a;
+        }
+
+        .error {
+            color: #ff4444;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #888;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Log Murph</h1>
+            <p>Daily Challenge Tracker</p>
+        </div>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" value="{{ today }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="duration">Time (MM:SS)</label>
+                <input type="text" id="duration" name="duration" placeholder="e.g. 45:30" required>
+            </div>
+
+            <div class="form-group">
+                <label for="rep_scheme">Rep Scheme</label>
+                <select id="rep_scheme" name="rep_scheme" onchange="toggleCustomRepScheme()">
+                    <option value="5-10-15">5-10-15 (Cindy)</option>
+                    <option value="5-10-15-20">5-10-15 (20 rounds)</option>
+                    <option value="Unpartitioned">Unpartitioned (100/200/300)</option>
+                    <option value="Half Murph">Half Murph</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="custom_rep_scheme_group" style="display: none;">
+                <label for="rep_scheme_custom">Custom Rep Scheme</label>
+                <input type="text" id="rep_scheme_custom" name="rep_scheme_custom" placeholder="Enter your rep scheme">
+            </div>
+
+            <script>
+                function toggleCustomRepScheme() {
+                    const select = document.getElementById('rep_scheme');
+                    const customGroup = document.getElementById('custom_rep_scheme_group');
+                    const customInput = document.getElementById('rep_scheme_custom');
+
+                    if (select.value === 'Other') {
+                        customGroup.style.display = 'block';
+                        customInput.required = true;
+                    } else {
+                        customGroup.style.display = 'none';
+                        customInput.required = false;
+                        customInput.value = '';
+                    }
+                }
+            </script>
+
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" rows="4" placeholder="How did it feel? Vest or no vest?"></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Log Entry</button>
+        </form>
+
+        <a href="/murph/tracker" class="back-link">View Progress</a>
+    </div>
+</body>
+
+</html>
