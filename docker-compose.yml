@@ -135,7 +135,8 @@ services:
       context: .
       dockerfile: packages/frontend/Dockerfile
       args:
-        VITE_API_URL: ${API_URL:-http://localhost:${API_PORT:-3000}}
+        # Use relative URL so frontend proxy handles it (proxy is configured in serve.js)
+        VITE_API_URL: /api/v1
     container_name: project-athlete-frontend
     restart: unless-stopped
     depends_on:
