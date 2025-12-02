@@ -50,13 +50,16 @@ The fastest way to deploy:
 git clone https://github.com/nicolaasearley/ProjectAthlete.git
 cd ProjectAthlete
 
-# 2. Run setup script (creates .env, generates secrets, creates directories)
+# 2. Make scripts executable (if needed)
+chmod +x scripts/*.sh deploy.sh
+
+# 3. Run setup script (creates .env, generates secrets, creates directories)
 ./scripts/setup.sh
 
-# 3. Edit .env file with your configuration
+# 4. Edit .env file with your configuration
 nano .env
 
-# 4. Deploy application
+# 5. Deploy application
 ./deploy.sh
 ```
 
