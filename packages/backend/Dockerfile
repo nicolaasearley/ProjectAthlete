@@ -43,9 +43,9 @@ COPY packages/shared/package.json packages/shared/
 # Copy all dependencies from dependencies stage
 COPY --from=dependencies /app/node_modules ./node_modules
 
-# Copy Prisma generated client
-COPY --from=prisma /app/packages/backend/node_modules/.prisma ./packages/backend/node_modules/.prisma
-COPY --from=prisma /app/packages/backend/node_modules/@prisma ./packages/backend/node_modules/@prisma
+# Copy Prisma generated client (generated to root node_modules due to workspaces)
+COPY --from=prisma /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=prisma /app/node_modules/@prisma ./node_modules/@prisma
 
 # Copy source files
 COPY tsconfig.json ./
@@ -75,9 +75,9 @@ COPY packages/shared/package.json packages/shared/
 # Install production dependencies only
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy Prisma generated client and schema
-COPY --from=prisma /app/packages/backend/node_modules/.prisma ./packages/backend/node_modules/.prisma
-COPY --from=prisma /app/packages/backend/node_modules/@prisma ./packages/backend/node_modules/@prisma
+# Copy Prisma generated client and schema (generated to root node_modules due to workspaces)
+COPY --from=prisma /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=prisma /app/node_modules/@prisma ./node_modules/@prisma
 COPY packages/backend/prisma ./packages/backend/prisma
 
 # Copy built application
