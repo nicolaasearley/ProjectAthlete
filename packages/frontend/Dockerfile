@@ -48,13 +48,15 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Copy root package files for workspace setup
+# Copy root package files for workspace setup (needed for npm workspaces)
 COPY package.json package-lock.json* ./
 COPY packages/frontend/package.json ./packages/frontend/
 
 # Install only production dependencies needed for serving
+# Use root workspace install, then we can use the frontend package
+WORKDIR /app
+RUN npm ci --omit=dev --workspace=packages/frontend && npm cache clean --force
 WORKDIR /app/packages/frontend
-RUN npm install --omit=dev && npm cache clean --force
 
 # Copy built application
 COPY --from=build /app/packages/frontend/dist ./dist
