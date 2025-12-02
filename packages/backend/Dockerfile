@@ -23,8 +23,6 @@ COPY packages/shared/package.json packages/shared/
 
 # Copy dependencies from previous stage
 COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=dependencies /app/packages/backend/node_modules ./packages/backend/node_modules 2>/dev/null || true
-COPY --from=dependencies /app/packages/shared/node_modules ./packages/shared/node_modules 2>/dev/null || true
 
 # Copy Prisma schema
 COPY packages/backend/prisma ./packages/backend/prisma
