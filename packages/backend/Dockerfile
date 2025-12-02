@@ -57,7 +57,9 @@ COPY packages/shared packages/shared
 
 # Build the application
 WORKDIR /app/packages/backend
-RUN npm run build
+RUN npm run build && \
+    ls -la dist/ && \
+    test -f dist/main.js || (echo "ERROR: dist/main.js not found after build!" && exit 1)
 
 FROM node:20-alpine AS production
 
