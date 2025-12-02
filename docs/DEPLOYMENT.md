@@ -405,6 +405,28 @@ docker stats
 docker-compose restart backend
 ```
 
+#### Backend Container Cannot Find dist/main.js
+
+If you see `Error: Cannot find module '/app/packages/backend/dist/main.js'`, the build output is missing. This is usually caused by a stale Docker build cache. Rebuild the backend without cache:
+
+```bash
+# Rebuild backend image without cache
+docker-compose build --no-cache backend
+
+# Then restart services
+docker-compose up -d
+```
+
+Or rebuild all services:
+
+```bash
+# Rebuild all images without cache
+docker-compose build --no-cache
+
+# Then restart
+docker-compose up -d
+```
+
 ## Moving to New Server
 
 ### Step 1: Backup Current Deployment
