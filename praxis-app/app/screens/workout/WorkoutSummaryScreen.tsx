@@ -1,70 +1,185 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
-import { Card, IconButton, PraxisButton, Spacer } from '../../components';
-import { useSessionStore, useUserStore } from '../../core/store';
+import { Card, IconButton, PraxisButton, Spacer, Chip } from '../../components';
+import { usePlanStore } from '../../core/store';
+import { detectNewPRs } from '../../engine/progress/detectPRs';
+import type {
+  WorkoutSessionLog,
+  PRRecord,
+  CompletedSet,
+} from '../../core/types';
+import dayjs from 'dayjs';
 
 type MainStackParamList = {
+  WorkoutSummary: { session: WorkoutSessionLog } | undefined;
   Home: undefined;
 };
 
+type WorkoutSummaryRouteProp = RouteProp<MainStackParamList, 'WorkoutSummary'>;
+
 type NavigationProp = StackNavigationProp<MainStackParamList>;
 
-interface PRHighlight {
-  exercise: string;
-  type: string;
-  value: string;
-  change?: string;
+/**
+ * Format ISO date string to readable format (e.g., "Monday, Feb 12")
+ */
+function formatDate(dateString: string): string {
+  const date = dayjs(dateString);
+  return date.format('dddd, MMM D');
+}
+
+/**
+ * Format exercise ID to readable name
+ */
+function formatExerciseName(exerciseId: string): string {
+  return exerciseId
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Estimate 1RM using Epley formula (same as in detectPRs)
+ */
+function estimate1RM(weight: number, reps: number): number | null {
+  if (!weight || weight <= 0 || !reps || reps < 1 || reps > 12) {
+    return null;
+  }
+  return weight * (1 + reps / 30);
+}
+
+/**
+ * Calculate session duration in minutes
+ */
+function calculateDuration(startedAt: string, endedAt: string): number {
+  const start = dayjs(startedAt);
+  const end = dayjs(endedAt);
+  return Math.round(end.diff(start, 'minute', true));
 }
 
 export default function WorkoutSummaryScreen() {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp>();
-  const { activeSession } = useSessionStore();
-  const { personalRecords } = useUserStore();
+  const route = useRoute<WorkoutSummaryRouteProp>();
+  const { session } = route.params || {};
 
-  // TODO: Replace with actual calculations from activeSession
-  const mockSessionMetrics = {
-    totalVolume: '12,450 lb',
-    totalSets: 18,
-    duration: 58,
-    conditioningOutput: {
-      avgPace: '1:52/500m',
-      bestRound: '1:48',
-      zonesHit: 'Z2–Z4',
-    },
+  const { plan } = usePlanStore();
+
+  // Get the workout plan day for context
+  const workoutPlan = useMemo(() => {
+    if (!session?.planDayId) return null;
+    return plan.find((day) => day.id === session.planDayId) || null;
+  }, [session, plan]);
+
+  // TODO: integrate PR persistence once backend exists.
+  const existingPRs: PRRecord[] = [];
+
+  // Run PR detection
+  const { newPRs } = useMemo(() => {
+    if (!session) return { newPRs: [] };
+    return detectNewPRs({
+      session,
+      existingPRs,
+    });
+  }, [session]);
+
+  // Calculate session duration
+  const duration = useMemo(() => {
+    if (!session?.startedAt || !session?.endedAt) return 0;
+    return calculateDuration(session.startedAt, session.endedAt);
+  }, [session]);
+
+  // Get exercise name for a set from the plan
+  const getExerciseNameForSet = (set: CompletedSet): string => {
+    if (!workoutPlan) {
+      return formatExerciseName(set.exerciseId);
+    }
+
+    // Find the block that contains this exercise
+    const block = workoutPlan.blocks.find((b) => b.id === set.blockId);
+    if (!block) {
+      return formatExerciseName(set.exerciseId);
+    }
+
+    // For strength blocks, try to get the exercise name
+    if (block.type === 'strength' && block.strengthMain) {
+      if (block.strengthMain.exerciseId === set.exerciseId) {
+        return formatExerciseName(set.exerciseId);
+      }
+    }
+
+    return formatExerciseName(set.exerciseId);
   };
 
-  // TODO: Replace with actual PR detection from completed session
-  const mockPRs: PRHighlight[] = [
-    {
-      exercise: 'Back Squat',
-      type: 'New Est. 1RM',
-      value: '300 lb',
-      change: '+5',
-    },
-    {
-      exercise: 'RDL',
-      type: 'Rep PR',
-      value: '225 x 8',
-    },
-  ];
+  // Group sets by block for display
+  const setsByBlock = useMemo(() => {
+    if (!session?.completedSets) return new Map<string, CompletedSet[]>();
 
-  // TODO: Replace with actual readiness impact calculation
-  const mockReadinessInsight =
-    "Today's training should increase tomorrow's readiness slightly.";
+    const grouped = new Map<string, CompletedSet[]>();
+    session.completedSets.forEach((set) => {
+      const existing = grouped.get(set.blockId) || [];
+      grouped.set(set.blockId, [...existing, set]);
+    });
+
+    return grouped;
+  }, [session]);
+
+  // Get block title
+  const getBlockTitle = (blockId: string): string => {
+    if (!workoutPlan) return 'Block';
+    const block = workoutPlan.blocks.find((b) => b.id === blockId);
+    return block?.title || 'Block';
+  };
 
   const handleFinish = () => {
-    navigation.navigate('Home');
+    navigation.replace('Home');
   };
+
+  // Error state: No session
+  if (!session) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        edges={['top', 'bottom']}
+      >
+        <View
+          style={[
+            styles.errorContainer,
+            {
+              padding: theme.spacing.xl,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.errorTitle,
+              {
+                color: theme.colors.white,
+                fontFamily: theme.typography.fonts.heading,
+                fontSize: theme.typography.sizes.h2,
+                marginBottom: theme.spacing.md,
+              },
+            ]}
+          >
+            Session not found.
+          </Text>
+          <PraxisButton
+            title="Back to Home"
+            onPress={handleFinish}
+            size="medium"
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.black }]}
       edges={['top']}
     >
       {/* Header */}
@@ -83,7 +198,7 @@ export default function WorkoutSummaryScreen() {
           icon={
             <Ionicons name="arrow-back" size={24} color={theme.colors.white} />
           }
-          onPress={() => navigation.navigate('Home')}
+          onPress={handleFinish}
           variant="ghost"
           size="medium"
         />
@@ -93,12 +208,25 @@ export default function WorkoutSummaryScreen() {
               styles.headerTitle,
               {
                 color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
+                fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
+                marginBottom: theme.spacing.xs,
               },
             ]}
           >
-            Session Summary
+            Workout Complete
+          </Text>
+          <Text
+            style={[
+              styles.headerDate,
+              {
+                color: theme.colors.muted,
+                fontFamily: theme.typography.fonts.body,
+                fontSize: theme.typography.sizes.bodySmall,
+              },
+            ]}
+          >
+            {formatDate(session.date)}
           </Text>
         </View>
         <View style={{ width: 44 }} />
@@ -112,299 +240,132 @@ export default function WorkoutSummaryScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Session Completed Card */}
-        <Card
-          variant="elevated"
-          padding="lg"
-          style={{ marginBottom: theme.spacing.lg }}
-        >
-          <View style={styles.completionContent}>
+        {/* PR Section */}
+        {newPRs.length > 0 ? (
+          <Card
+            variant="elevated"
+            padding="lg"
+            style={{
+              backgroundColor: theme.colors.graphite,
+              borderRadius: theme.radius.lg,
+              marginBottom: theme.spacing.lg,
+            }}
+          >
             <View
-              style={[
-                styles.checkmarkContainer,
-                {
-                  width: 80,
-                  height: 80,
-                  borderRadius: 40,
-                  backgroundColor: theme.colors.acidGreen,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: theme.spacing.lg,
-                },
-              ]}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: theme.spacing.md,
+              }}
             >
               <Text
                 style={[
-                  styles.checkmark,
+                  styles.sectionTitle,
                   {
-                    color: theme.colors.black,
-                    fontSize: 48,
+                    color: theme.colors.white,
+                    fontFamily: theme.typography.fonts.headingMedium,
+                    fontSize: theme.typography.sizes.h2,
                   },
                 ]}
               >
-                [✔]
+                New PRs!
               </Text>
-              {/* TODO: Replace with proper checkmark icon */}
+              <View
+                style={[
+                  styles.prBadge,
+                  {
+                    backgroundColor: theme.colors.acidGreen,
+                    marginLeft: theme.spacing.sm,
+                    paddingHorizontal: theme.spacing.sm,
+                    paddingVertical: 4,
+                    borderRadius: theme.radius.sm,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    {
+                      color: theme.colors.black,
+                      fontFamily: theme.typography.fonts.bodyMedium,
+                      fontSize: theme.typography.sizes.bodySmall,
+                      fontWeight: '600',
+                    },
+                  ]}
+                >
+                  PR
+                </Text>
+              </View>
             </View>
-            <Text
-              style={[
-                styles.completionTitle,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.heading,
-                  fontSize: theme.typography.sizes.h1,
-                  marginBottom: theme.spacing.sm,
-                },
-              ]}
-            >
-              Great work!
-            </Text>
-            <Text
-              style={[
-                styles.completionSubtitle,
-                {
-                  color: theme.colors.muted,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              Here's how today went.
-            </Text>
-          </View>
-        </Card>
 
-        {/* Performance Metrics */}
-        <Card
-          variant="elevated"
-          padding="lg"
-          style={{ marginBottom: theme.spacing.lg }}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.lg,
-              },
-            ]}
-          >
-            Performance
-          </Text>
-
-          <View
-            style={[
-              styles.metricRow,
-              {
-                paddingVertical: theme.spacing.md,
-                borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.metricLabel,
-                {
-                  color: theme.colors.muted,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              Total Volume:
-            </Text>
-            <Text
-              style={[
-                styles.metricValue,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.bodyMedium,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              {mockSessionMetrics.totalVolume}
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.metricRow,
-              {
-                paddingVertical: theme.spacing.md,
-                borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.metricLabel,
-                {
-                  color: theme.colors.muted,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              Total Sets Completed:
-            </Text>
-            <Text
-              style={[
-                styles.metricValue,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.bodyMedium,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              {mockSessionMetrics.totalSets} sets
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.metricRow,
-              {
-                paddingVertical: theme.spacing.md,
-                borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.metricLabel,
-                {
-                  color: theme.colors.muted,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              Duration:
-            </Text>
-            <Text
-              style={[
-                styles.metricValue,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.bodyMedium,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              {mockSessionMetrics.duration} min
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.conditioningSection,
-              {
-                paddingTop: theme.spacing.md,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.conditioningLabel,
-                {
-                  color: theme.colors.muted,
-                  fontFamily: theme.typography.fonts.bodyMedium,
-                  fontSize: theme.typography.sizes.bodySmall,
-                  marginBottom: theme.spacing.sm,
-                },
-              ]}
-            >
-              Conditioning Output:
-            </Text>
-            <Text
-              style={[
-                styles.conditioningValue,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.bodySmall,
-                  marginBottom: theme.spacing.xs,
-                },
-              ]}
-            >
-              Avg Pace: {mockSessionMetrics.conditioningOutput.avgPace}
-            </Text>
-            <Text
-              style={[
-                styles.conditioningValue,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.bodySmall,
-                  marginBottom: theme.spacing.xs,
-                },
-              ]}
-            >
-              Best Round: {mockSessionMetrics.conditioningOutput.bestRound}
-            </Text>
-            <Text
-              style={[
-                styles.conditioningValue,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.bodySmall,
-                },
-              ]}
-            >
-              Zones Hit: {mockSessionMetrics.conditioningOutput.zonesHit}
-            </Text>
-          </View>
-        </Card>
-
-        {/* PR Highlights */}
-        <Card
-          variant="elevated"
-          padding="lg"
-          style={{ marginBottom: theme.spacing.lg }}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.lg,
-              },
-            ]}
-          >
-            PR Highlights
-          </Text>
-
-          {mockPRs.length > 0 ? (
-            mockPRs.map((pr, index) => (
-              <Text
-                key={index}
+            {newPRs.map((pr, index) => (
+              <View
+                key={pr.id}
                 style={[
-                  styles.prItem,
+                  styles.prCard,
                   {
-                    color: theme.colors.acidGreen,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.body,
+                    backgroundColor: theme.colors.graphite,
+                    borderRadius: theme.radius.md,
+                    padding: theme.spacing.md,
+                    borderWidth: 2,
+                    borderColor: theme.colors.acidGreen,
                     marginBottom:
-                      index < mockPRs.length - 1 ? theme.spacing.md : 0,
-                    lineHeight: 22,
+                      index < newPRs.length - 1 ? theme.spacing.md : 0,
                   },
                 ]}
               >
-                • {pr.exercise}: {pr.type} — {pr.value}
-                {pr.change && ` (${pr.change})`}
-              </Text>
-            ))
-          ) : (
+                <Text
+                  style={[
+                    styles.prExercise,
+                    {
+                      color: theme.colors.white,
+                      fontFamily: theme.typography.fonts.headingMedium,
+                      fontSize: theme.typography.sizes.h3,
+                      marginBottom: theme.spacing.xs,
+                    },
+                  ]}
+                >
+                  {formatExerciseName(pr.exerciseId)}
+                </Text>
+                <Text
+                  style={[
+                    styles.prValue,
+                    {
+                      color: theme.colors.acidGreen,
+                      fontFamily: theme.typography.fonts.heading,
+                      fontSize: theme.typography.sizes.h2,
+                    },
+                  ]}
+                >
+                  {pr.estimated1RM.toFixed(1)} lb
+                </Text>
+                {pr.changeFromPrevious !== undefined && (
+                  <Text
+                    style={[
+                      styles.prChange,
+                      {
+                        color: theme.colors.muted,
+                        fontFamily: theme.typography.fonts.body,
+                        fontSize: theme.typography.sizes.bodySmall,
+                        marginTop: theme.spacing.xs,
+                      },
+                    ]}
+                  >
+                    +{pr.changeFromPrevious.toFixed(1)} from previous
+                  </Text>
+                )}
+              </View>
+            ))}
+          </Card>
+        ) : (
+          <Card
+            variant="elevated"
+            padding="lg"
+            style={{
+              backgroundColor: theme.colors.graphite,
+              borderRadius: theme.radius.lg,
+              marginBottom: theme.spacing.lg,
+            }}
+          >
             <Text
               style={[
                 styles.emptyText,
@@ -412,96 +373,208 @@ export default function WorkoutSummaryScreen() {
                   color: theme.colors.muted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
+                  textAlign: 'center',
                 },
               ]}
             >
-              No PRs today — but progress was still made.
+              No new PRs today — but every rep counts.
             </Text>
-          )}
-        </Card>
+          </Card>
+        )}
 
-        {/* Readiness Impact */}
-        <Card
-          variant="elevated"
-          padding="lg"
-          style={{ marginBottom: theme.spacing.lg }}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.lg,
-              },
-            ]}
-          >
-            Readiness Insight
-          </Text>
-
-          <Text
-            style={[
-              styles.insightText,
-              {
-                color: theme.colors.muted,
-                fontFamily: theme.typography.fonts.body,
-                fontSize: theme.typography.sizes.body,
-                lineHeight: 22,
-              },
-            ]}
-          >
-            {mockReadinessInsight}
-          </Text>
-        </Card>
-
-        {/* Session Notes */}
-        <Card
-          variant="elevated"
-          padding="lg"
-          style={{ marginBottom: theme.spacing.lg }}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            Session Notes
-          </Text>
-
-          <View
-            style={[
-              styles.notesPlaceholder,
-              {
-                backgroundColor: theme.colors.graphite,
-                borderRadius: theme.radius.md,
-                padding: theme.spacing.lg,
-                borderWidth: 1,
-                borderColor: theme.colors.steel,
-                minHeight: 100,
-              },
-            ]}
+        {/* Strength Sets */}
+        {session.completedSets.length > 0 && (
+          <Card
+            variant="elevated"
+            padding="lg"
+            style={{
+              backgroundColor: theme.colors.graphite,
+              borderRadius: theme.radius.lg,
+              marginBottom: theme.spacing.lg,
+            }}
           >
             <Text
               style={[
-                styles.notesPlaceholderText,
+                styles.sectionTitle,
                 {
-                  color: theme.colors.mutedDark,
+                  color: theme.colors.white,
+                  fontFamily: theme.typography.fonts.headingMedium,
+                  fontSize: theme.typography.sizes.h3,
+                  marginBottom: theme.spacing.md,
+                },
+              ]}
+            >
+              Strength Sets
+            </Text>
+
+            {Array.from(setsByBlock.entries()).map(([blockId, sets]) => (
+              <View key={blockId} style={{ marginBottom: theme.spacing.md }}>
+                <Text
+                  style={[
+                    styles.blockTitle,
+                    {
+                      color: theme.colors.acidGreen,
+                      fontFamily: theme.typography.fonts.bodyMedium,
+                      fontSize: theme.typography.sizes.body,
+                      marginBottom: theme.spacing.sm,
+                    },
+                  ]}
+                >
+                  {getBlockTitle(blockId)}
+                </Text>
+                {sets.map((set, index) => {
+                  const estimated1RM =
+                    set.weight && set.reps
+                      ? estimate1RM(set.weight, set.reps)
+                      : null;
+
+                  return (
+                    <View
+                      key={index}
+                      style={[
+                        styles.setRow,
+                        {
+                          paddingVertical: theme.spacing.sm,
+                          borderBottomWidth: index < sets.length - 1 ? 1 : 0,
+                          borderBottomColor: theme.colors.steel,
+                        },
+                      ]}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={[
+                            styles.setExercise,
+                            {
+                              color: theme.colors.white,
+                              fontFamily: theme.typography.fonts.bodyMedium,
+                              fontSize: theme.typography.sizes.body,
+                            },
+                          ]}
+                        >
+                          {getExerciseNameForSet(set)}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.setDetails,
+                            {
+                              color: theme.colors.muted,
+                              fontFamily: theme.typography.fonts.body,
+                              fontSize: theme.typography.sizes.bodySmall,
+                              marginTop: 4,
+                            },
+                          ]}
+                        >
+                          {set.reps || '?'} × {set.weight || '?'} lb
+                          {set.rpe ? ` @ RPE ${set.rpe}` : ''}
+                          {estimated1RM
+                            ? ` (Est. 1RM: ${estimated1RM.toFixed(1)} lb)`
+                            : ''}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </Card>
+        )}
+
+        {/* Conditioning Rounds */}
+        {session.conditioningRounds.length > 0 && (
+          <Card
+            variant="elevated"
+            padding="lg"
+            style={{
+              backgroundColor: theme.colors.graphite,
+              borderRadius: theme.radius.lg,
+              marginBottom: theme.spacing.lg,
+            }}
+          >
+            <Text
+              style={[
+                styles.sectionTitle,
+                {
+                  color: theme.colors.white,
+                  fontFamily: theme.typography.fonts.headingMedium,
+                  fontSize: theme.typography.sizes.h3,
+                  marginBottom: theme.spacing.md,
+                },
+              ]}
+            >
+              Conditioning Rounds
+            </Text>
+
+            {session.conditioningRounds.map((round, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.roundRow,
+                  {
+                    paddingVertical: theme.spacing.sm,
+                    borderBottomWidth:
+                      index < session.conditioningRounds.length - 1 ? 1 : 0,
+                    borderBottomColor: theme.colors.steel,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.roundLabel,
+                    {
+                      color: theme.colors.white,
+                      fontFamily: theme.typography.fonts.bodyMedium,
+                      fontSize: theme.typography.sizes.body,
+                      marginBottom: 4,
+                    },
+                  ]}
+                >
+                  Round {round.roundIndex + 1}
+                </Text>
+                <Text
+                  style={[
+                    styles.roundDetails,
+                    {
+                      color: theme.colors.muted,
+                      fontFamily: theme.typography.fonts.body,
+                      fontSize: theme.typography.sizes.bodySmall,
+                    },
+                  ]}
+                >
+                  Work: {round.workSeconds}s | Rest: {round.restSeconds}s
+                  {round.perceivedIntensity
+                    ? ` | PI: ${round.perceivedIntensity}/10`
+                    : ''}
+                </Text>
+              </View>
+            ))}
+          </Card>
+        )}
+
+        {/* Duration */}
+        {duration > 0 && (
+          <Card
+            variant="elevated"
+            padding="lg"
+            style={{
+              backgroundColor: theme.colors.graphite,
+              borderRadius: theme.radius.lg,
+              marginBottom: theme.spacing.lg,
+            }}
+          >
+            <Text
+              style={[
+                styles.durationText,
+                {
+                  color: theme.colors.white,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
               ]}
             >
-              Add notes about today's session… (feature coming soon)
+              Session duration: {duration} minutes
             </Text>
-          </View>
-        </Card>
+          </Card>
+        )}
 
         <Spacer size="lg" />
       </ScrollView>
@@ -517,7 +590,11 @@ export default function WorkoutSummaryScreen() {
           },
         ]}
       >
-        <PraxisButton title="Finish" onPress={handleFinish} size="large" />
+        <PraxisButton
+          title="Back to Home"
+          onPress={handleFinish}
+          size="large"
+        />
       </View>
     </SafeAreaView>
   );
@@ -537,7 +614,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  headerDate: {
+    fontWeight: '400',
   },
   scrollView: {
     flex: 1,
@@ -545,65 +625,68 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
   },
-  completionContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkmarkContainer: {
-    // Styled inline
-  },
-  checkmark: {
-    fontWeight: 'bold',
-  },
-  completionTitle: {
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  completionSubtitle: {
-    fontWeight: '400',
-    textAlign: 'center',
-  },
   sectionTitle: {
     fontWeight: '600',
   },
-  metricRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  prBadge: {
+    // Styled inline
   },
-  metricLabel: {
-    fontWeight: '400',
+  prCard: {
+    // Styled inline
   },
-  metricValue: {
-    fontWeight: '500',
+  prExercise: {
+    fontWeight: '600',
   },
-  conditioningSection: {
-    width: '100%',
+  prValue: {
+    fontWeight: '700',
   },
-  conditioningLabel: {
-    fontWeight: '500',
-  },
-  conditioningValue: {
-    fontWeight: '400',
-  },
-  prItem: {
+  prChange: {
     fontWeight: '400',
   },
   emptyText: {
     fontWeight: '400',
     fontStyle: 'italic',
   },
-  insightText: {
+  blockTitle: {
+    fontWeight: '500',
+    textTransform: 'uppercase',
+  },
+  setRow: {
+    width: '100%',
+  },
+  setExercise: {
+    fontWeight: '500',
+  },
+  setDetails: {
     fontWeight: '400',
   },
-  notesPlaceholder: {
-    // Styled inline
+  roundRow: {
+    width: '100%',
   },
-  notesPlaceholderText: {
+  roundLabel: {
+    fontWeight: '500',
+  },
+  roundDetails: {
     fontWeight: '400',
-    fontStyle: 'italic',
+  },
+  durationText: {
+    fontWeight: '400',
   },
   footer: {
     width: '100%',
   },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorTitle: {
+    fontWeight: '700',
+    textAlign: 'center',
+  },
 });
+
+// TODO: Persist new PRs into database (Supabase) when backend is connected
+// TODO: Add charts or progress trend visualizations
+// TODO: Animate PR cards (slide or fade-in)
+// TODO: Show weekly progress summary
