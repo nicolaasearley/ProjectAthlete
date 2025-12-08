@@ -1,16 +1,16 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../theme';
-import { Card, PraxisButton, Spacer } from '../../components';
-import { useUserStore, usePlanStore } from '../../core/store';
-import dayjs from 'dayjs';
+import { Card, PraxisButton, Spacer, Chip } from '../../components';
+import { usePlanStore } from '../../core/store';
 
 type MainStackParamList = {
-  WorkoutOverview: undefined;
-  WorkoutSession: undefined;
+  WorkoutOverview: { planDayId?: string } | undefined;
+  PlanRegeneration: undefined;
+  Calendar: undefined;
 };
 
 type NavigationProp = StackNavigationProp<MainStackParamList>;
@@ -18,42 +18,34 @@ type NavigationProp = StackNavigationProp<MainStackParamList>;
 export default function HomeScreen() {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp>();
-  const { currentReadiness, personalRecords } = useUserStore();
-  const planStore = usePlanStore();
+  const { plan, getTodayPlan } = usePlanStore();
 
-  const todayDate = dayjs().format('YYYY-MM-DD');
-  const todayWorkout = useMemo(
-    () => planStore.getPlanDayByDate(todayDate),
-    [todayDate, planStore]
-  );
+  const todayWorkout = getTodayPlan();
 
-  // TODO: Get from useSessionStore when implemented
-  // Mock weekly consistency data for now
-  const weeklyConsistency = useMemo(() => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    // TODO: Replace with actual session completion data from useSessionStore
-    return days.map((day) => ({
-      day,
-      status: 'upcoming' as 'completed' | 'missed' | 'upcoming',
-    }));
-  }, []);
-
-  const getReadinessClassification = (score: number): string => {
-    if (score >= 80) return 'High Readiness';
-    if (score >= 60) return 'Moderate Readiness';
-    return 'Low Readiness';
+  // Handle navigation to WorkoutOverview
+  const handleOpenWorkout = () => {
+    if (todayWorkout) {
+      navigation.navigate('WorkoutOverview', { planDayId: todayWorkout.id });
+    } else {
+      // Fallback if workout is missing
+      navigation.navigate('WorkoutOverview');
+    }
   };
 
-  const handleViewDetails = () => {
-    navigation.navigate('WorkoutOverview');
+  // Handle navigation to plan generation
+  const handleGeneratePlan = () => {
+    navigation.navigate('PlanRegeneration');
   };
 
-  const handleStartWorkout = () => {
-    navigation.navigate('WorkoutSession');
+  // Handle navigation to calendar/week view
+  const handleViewWeek = () => {
+    navigation.navigate('Calendar');
   };
 
-  const readinessScore = currentReadiness?.readinessScore ?? 75; // TODO: Remove mock when readiness is implemented
-  const readinessClassification = getReadinessClassification(readinessScore);
+  // Handle regeneration
+  const handleRegenerateWeek = () => {
+    navigation.navigate('PlanRegeneration');
+  };
 
   return (
     <SafeAreaView
@@ -68,184 +60,37 @@ export default function HomeScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Daily Readiness Card */}
-        <Card variant="elevated" padding="lg">
-          <Text
-            style={[
-              styles.cardTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            Today's Readiness
-          </Text>
+        {/* Title */}
+        <Text
+          style={[
+            styles.title,
+            {
+              color: theme.colors.white,
+              fontFamily: theme.typography.fonts.heading,
+              fontSize: theme.typography.sizes.h1,
+              marginBottom: theme.spacing.xl,
+            },
+          ]}
+        >
+          Today
+        </Text>
 
-          <View style={styles.readinessContent}>
+        {/* State 1: No Plan */}
+        {plan.length === 0 ? (
+          <Card variant="elevated" padding="lg">
             <Text
               style={[
-                styles.readinessScore,
+                styles.emptyTitle,
                 {
-                  color: theme.colors.acidGreen,
-                  fontFamily: theme.typography.fonts.heading,
-                  fontSize: 56,
+                  color: theme.colors.white,
+                  fontFamily: theme.typography.fonts.headingMedium,
+                  fontSize: theme.typography.sizes.h3,
+                  marginBottom: theme.spacing.md,
                 },
               ]}
             >
-              {readinessScore}
+              No active training cycle.
             </Text>
-            <Text
-              style={[
-                styles.readinessLabel,
-                {
-                  color: theme.colors.muted,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              {readinessClassification}
-            </Text>
-          </View>
-
-          {/* Simple bar visualization placeholder */}
-          <View
-            style={[
-              styles.readinessBar,
-              {
-                backgroundColor: theme.colors.steel,
-                borderRadius: theme.radius.pill,
-                height: 6,
-                marginTop: theme.spacing.md,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.readinessBarFill,
-                {
-                  backgroundColor: theme.colors.acidGreen,
-                  width: `${readinessScore}%`,
-                  borderRadius: theme.radius.pill,
-                },
-              ]}
-            />
-          </View>
-        </Card>
-
-        <Spacer size="lg" />
-
-        {/* Today's Workout Card */}
-        <Card variant="elevated" padding="lg">
-          <Text
-            style={[
-              styles.cardTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            Today's Training
-          </Text>
-
-          {todayWorkout ? (
-            <>
-              <View style={styles.workoutInfo}>
-                {todayWorkout.focusTags.length > 0 && (
-                  <View style={styles.focusTags}>
-                    {todayWorkout.focusTags.map((tag, index) => (
-                      <Text
-                        key={index}
-                        style={[
-                          styles.tag,
-                          {
-                            color: theme.colors.acidGreen,
-                            fontFamily: theme.typography.fonts.bodyMedium,
-                            fontSize: theme.typography.sizes.bodySmall,
-                            marginRight:
-                              index < todayWorkout.focusTags.length - 1
-                                ? theme.spacing.sm
-                                : 0,
-                          },
-                        ]}
-                      >
-                        {tag}
-                        {index < todayWorkout.focusTags.length - 1 ? ' + ' : ''}
-                      </Text>
-                    ))}
-                  </View>
-                )}
-
-                <Text
-                  style={[
-                    styles.duration,
-                    {
-                      color: theme.colors.muted,
-                      fontFamily: theme.typography.fonts.body,
-                      fontSize: theme.typography.sizes.body,
-                      marginTop: theme.spacing.sm,
-                    },
-                  ]}
-                >
-                  {todayWorkout.estimatedDurationMinutes} min
-                </Text>
-
-                <View style={styles.blocksList}>
-                  {todayWorkout.blocks.map((block, index) => {
-                    let blockText = block.title;
-                    if (block.strengthMain) {
-                      const sets = block.strengthMain.sets.length;
-                      blockText = `${block.title} — ${sets}x5 @ RPE 8`;
-                    } else if (block.conditioning) {
-                      const rounds = block.conditioning.rounds ?? 4;
-                      const zone = block.conditioning.targetZone ?? 'Z4';
-                      blockText = `${block.title} — ${rounds}x4 @ ${zone}`;
-                    }
-
-                    return (
-                      <Text
-                        key={block.id}
-                        style={[
-                          styles.blockItem,
-                          {
-                            color: theme.colors.white,
-                            fontFamily: theme.typography.fonts.body,
-                            fontSize: theme.typography.sizes.bodySmall,
-                          },
-                        ]}
-                      >
-                        • {blockText}
-                      </Text>
-                    );
-                  })}
-                </View>
-              </View>
-
-              <Spacer size="md" />
-
-              <View style={styles.workoutActions}>
-                <PraxisButton
-                  title="View Details"
-                  onPress={handleViewDetails}
-                  variant="outline"
-                  size="medium"
-                  style={{ flex: 1, marginRight: theme.spacing.sm }}
-                />
-                <PraxisButton
-                  title="Start Workout"
-                  onPress={handleStartWorkout}
-                  size="medium"
-                  style={{ flex: 1, marginLeft: theme.spacing.sm }}
-                />
-              </View>
-            </>
-          ) : (
             <Text
               style={[
                 styles.emptyText,
@@ -253,137 +98,162 @@ export default function HomeScreen() {
                   color: theme.colors.muted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
+                  marginBottom: theme.spacing.lg,
+                },
+              ]}
+            >
+              No training plan found. Please regenerate your plan.
+            </Text>
+            <PraxisButton
+              title="Generate Plan"
+              onPress={handleGeneratePlan}
+              size="medium"
+            />
+          </Card>
+        ) : todayWorkout && todayWorkout.blocks.length === 0 ? (
+          /* State 2: Rest Day */
+          <Card variant="elevated" padding="lg">
+            <Text
+              style={[
+                styles.restDayTitle,
+                {
+                  color: theme.colors.white,
+                  fontFamily: theme.typography.fonts.heading,
+                  fontSize: theme.typography.sizes.h1,
+                  marginBottom: theme.spacing.md,
+                },
+              ]}
+            >
+              Rest Day
+            </Text>
+            <Text
+              style={[
+                styles.restDaySubtitle,
+                {
+                  color: theme.colors.muted,
+                  fontFamily: theme.typography.fonts.body,
+                  fontSize: theme.typography.sizes.body,
+                  marginBottom: theme.spacing.xl,
+                },
+              ]}
+            >
+              Recovery is part of the process.
+            </Text>
+            <PraxisButton
+              title="View Week"
+              onPress={handleViewWeek}
+              variant="outline"
+              size="medium"
+              style={{ marginBottom: theme.spacing.md }}
+            />
+            <PraxisButton
+              title="Regenerate Week"
+              onPress={handleRegenerateWeek}
+              variant="ghost"
+              size="medium"
+            />
+          </Card>
+        ) : todayWorkout ? (
+          /* State 3: Has Workout */
+          <Card variant="elevated" padding="lg">
+            <View style={styles.workoutHeader}>
+              <Text
+                style={[
+                  styles.cardTitle,
+                  {
+                    color: theme.colors.white,
+                    fontFamily: theme.typography.fonts.headingMedium,
+                    fontSize: theme.typography.sizes.h3,
+                    marginBottom: theme.spacing.md,
+                  },
+                ]}
+              >
+                Today's Training
+              </Text>
+
+              {/* Focus Tags */}
+              {todayWorkout.focusTags.length > 0 && (
+                <View style={styles.focusTagsContainer}>
+                  {todayWorkout.focusTags.map((tag, index) => (
+                    <Chip
+                      key={index}
+                      label={tag}
+                      variant="accent"
+                      size="small"
+                      style={{ marginRight: theme.spacing.xs }}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {/* Duration */}
+              <Text
+                style={[
+                  styles.duration,
+                  {
+                    color: theme.colors.muted,
+                    fontFamily: theme.typography.fonts.body,
+                    fontSize: theme.typography.sizes.body,
+                    marginTop: theme.spacing.md,
+                    marginBottom: theme.spacing.md,
+                  },
+                ]}
+              >
+                Duration: {todayWorkout.estimatedDurationMinutes} min
+              </Text>
+
+              {/* Block Titles List */}
+              <View style={styles.blocksList}>
+                {todayWorkout.blocks.map((block, index) => (
+                  <Text
+                    key={block.id}
+                    style={[
+                      styles.blockItem,
+                      {
+                        color: theme.colors.white,
+                        fontFamily: theme.typography.fonts.body,
+                        fontSize: theme.typography.sizes.bodySmall,
+                      },
+                    ]}
+                  >
+                    • {block.title}
+                  </Text>
+                ))}
+              </View>
+            </View>
+
+            <Spacer size="md" />
+
+            <PraxisButton
+              title="Open Today's Workout"
+              onPress={handleOpenWorkout}
+              size="large"
+            />
+          </Card>
+        ) : (
+          /* Fallback: Plan exists but no workout for today */
+          <Card variant="elevated" padding="lg">
+            <Text
+              style={[
+                styles.emptyText,
+                {
+                  color: theme.colors.muted,
+                  fontFamily: theme.typography.fonts.body,
+                  fontSize: theme.typography.sizes.body,
+                  marginBottom: theme.spacing.lg,
                 },
               ]}
             >
               No workout planned for today.
             </Text>
-          )}
-        </Card>
-
-        <Spacer size="lg" />
-
-        {/* Weekly Consistency Summary */}
-        <Card variant="elevated" padding="lg">
-          <Text
-            style={[
-              styles.cardTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            Weekly Consistency
-          </Text>
-
-          <View style={styles.consistencyRow}>
-            {weeklyConsistency.map((day, index) => {
-              let dotColor = theme.colors.graphite;
-              if (day.status === 'completed') {
-                dotColor = theme.colors.acidGreen;
-              } else if (day.status === 'missed') {
-                dotColor = theme.colors.danger;
-              }
-
-              return (
-                <View
-                  key={index}
-                  style={[
-                    styles.consistencyDay,
-                    { marginRight: index < 6 ? theme.spacing.md : 0 },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.consistencyDot,
-                      {
-                        backgroundColor: dotColor,
-                        width: 12,
-                        height: 12,
-                        borderRadius: 6,
-                      },
-                    ]}
-                  />
-                  <Text
-                    style={[
-                      styles.consistencyDayLabel,
-                      {
-                        color: theme.colors.muted,
-                        fontFamily: theme.typography.fonts.body,
-                        fontSize: theme.typography.sizes.caption,
-                        marginTop: theme.spacing.xs,
-                      },
-                    ]}
-                  >
-                    {day.day}
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
-        </Card>
-
-        <Spacer size="lg" />
-
-        {/* Recent PR Highlights */}
-        <Card variant="elevated" padding="lg">
-          <Text
-            style={[
-              styles.cardTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            Recent Personal Records
-          </Text>
-
-          {personalRecords.length > 0 ? (
-            <View style={styles.prList}>
-              {personalRecords.slice(0, 3).map((pr) => {
-                const changeText =
-                  pr.changeFromPrevious && pr.changeFromPrevious > 0
-                    ? `+${pr.changeFromPrevious} lb`
-                    : 'New Best';
-
-                return (
-                  <Text
-                    key={pr.id}
-                    style={[
-                      styles.prItem,
-                      {
-                        color: theme.colors.white,
-                        fontFamily: theme.typography.fonts.body,
-                        fontSize: theme.typography.sizes.body,
-                      },
-                    ]}
-                  >
-                    {pr.exerciseId}: {changeText}
-                  </Text>
-                );
-              })}
-            </View>
-          ) : (
-            <Text
-              style={[
-                styles.emptyText,
-                {
-                  color: theme.colors.muted,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              No PRs yet. They're coming.
-            </Text>
-          )}
-        </Card>
+            <PraxisButton
+              title="View Week"
+              onPress={handleViewWeek}
+              variant="outline"
+              size="medium"
+            />
+          </Card>
+        )}
 
         <Spacer size="lg" />
       </ScrollView>
@@ -401,74 +271,44 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
   },
+  title: {
+    fontWeight: '700',
+  },
   cardTitle: {
     fontWeight: '600',
   },
-  readinessContent: {
-    alignItems: 'center',
+  emptyTitle: {
+    fontWeight: '600',
+    textAlign: 'center',
   },
-  readinessScore: {
+  emptyText: {
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  restDayTitle: {
     fontWeight: '700',
-    lineHeight: 64,
+    textAlign: 'center',
   },
-  readinessLabel: {
-    marginTop: 4,
+  restDaySubtitle: {
+    textAlign: 'center',
+    lineHeight: 22,
   },
-  readinessBar: {
-    overflow: 'hidden',
+  workoutHeader: {
     width: '100%',
   },
-  readinessBarFill: {
-    height: '100%',
-  },
-  workoutInfo: {
-    width: '100%',
-  },
-  focusTags: {
+  focusTagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-  },
-  tag: {
-    fontWeight: '500',
+    marginBottom: 8,
   },
   duration: {
     fontWeight: '400',
   },
   blocksList: {
-    marginTop: 12,
+    marginTop: 8,
   },
   blockItem: {
-    marginBottom: 6,
-    lineHeight: 20,
-  },
-  workoutActions: {
-    flexDirection: 'row',
-    width: '100%',
-  },
-  emptyText: {
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  consistencyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  consistencyDay: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  consistencyDot: {
-    // Size and color set inline
-  },
-  consistencyDayLabel: {
-    textAlign: 'center',
-  },
-  prList: {
-    width: '100%',
-  },
-  prItem: {
     marginBottom: 8,
-    lineHeight: 22,
+    lineHeight: 20,
   },
 });
