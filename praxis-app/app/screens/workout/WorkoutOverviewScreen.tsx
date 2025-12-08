@@ -1,81 +1,217 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
-import { Card, PraxisButton, Spacer, IconButton } from '../../components';
+import { Card, PraxisButton, Spacer, IconButton, Chip } from '../../components';
 import { usePlanStore } from '../../core/store';
+import { useSessionStore } from '../../store/useSessionStore';
 import dayjs from 'dayjs';
 
 type MainStackParamList = {
-  WorkoutSession: undefined;
+  WorkoutOverview: { planDayId?: string } | undefined;
+  ActiveWorkout: { planDayId: string } | undefined;
+  Home: undefined;
 };
 
+type WorkoutOverviewRouteProp = RouteProp<
+  MainStackParamList,
+  'WorkoutOverview'
+>;
+
 type NavigationProp = StackNavigationProp<MainStackParamList>;
+
+/**
+ * Format ISO date string to readable format (e.g., "Monday, Feb 12")
+ */
+function formatDate(dateString: string): string {
+  const date = dayjs(dateString);
+  return date.format('dddd, MMM D');
+}
 
 export default function WorkoutOverviewScreen() {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp>();
-  const planStore = usePlanStore();
+  const route = useRoute<WorkoutOverviewRouteProp>();
+  const { planDayId } = route.params || {};
+  const { plan } = usePlanStore();
+  const { startSession } = useSessionStore();
 
-  const todayDate = dayjs().format('YYYY-MM-DD');
-  const workoutPlan = useMemo(
-    () => planStore.getPlanDayByDate(todayDate),
-    [todayDate, planStore]
-  );
+  // Find the plan day by ID
+  const today =
+    planDayId !== undefined ? plan.find((day) => day.id === planDayId) : null;
 
-  // TODO: Replace with actual exercise names from exercise definitions
-  const getExerciseName = (exerciseId: string): string => {
-    const exerciseNames: Record<string, string> = {
-      back_squat: 'Back Squat',
-      bench_press: 'Bench Press',
-      deadlift: 'Deadlift',
-      rdl: 'RDL',
-      hanging_knee_raise: 'Hanging Knee Raise',
-    };
-    return exerciseNames[exerciseId] || exerciseId;
+  // Handle "Begin Workout" button press
+  const handleBeginWorkout = () => {
+    if (!today || !planDayId) return;
+
+    // Start the session
+    startSession(planDayId);
+
+    // Navigate to ActiveWorkout screen
+    // TODO: Verify route name matches navigation setup
+    navigation.navigate('ActiveWorkout', { planDayId });
   };
 
-  const warmupBlock = workoutPlan?.blocks.find((b) => b.type === 'warmup');
-  const strengthBlock = workoutPlan?.blocks.find((b) => b.type === 'strength');
-  const accessoryBlock = workoutPlan?.blocks.find(
-    (b) => b.type === 'accessory'
-  );
-  const conditioningBlock = workoutPlan?.blocks.find(
-    (b) => b.type === 'conditioning'
-  );
-  const cooldownBlock = workoutPlan?.blocks.find((b) => b.type === 'cooldown');
-
-  const handleBeginSession = () => {
-    navigation.navigate('WorkoutSession');
+  // Handle back navigation
+  const handleBack = () => {
+    navigation.navigate('Home');
   };
 
-  const handleViewDetails = () => {
-    // TODO: Implement view details modal/screen
-  };
+  // Error state: Workout not found
+  if (planDayId && !today) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        edges={['top', 'bottom']}
+      >
+        <View
+          style={[
+            styles.errorContainer,
+            {
+              padding: theme.spacing.xl,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.errorTitle,
+              {
+                color: theme.colors.white,
+                fontFamily: theme.typography.fonts.heading,
+                fontSize: theme.typography.sizes.h2,
+                marginBottom: theme.spacing.md,
+              },
+            ]}
+          >
+            Workout not found.
+          </Text>
+          <PraxisButton
+            title="Back to Home"
+            onPress={handleBack}
+            size="medium"
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-  const handleEditLoad = () => {
-    // TODO: Implement edit load modal
-  };
+  // Rest day state: No blocks
+  if (today && today.blocks.length === 0) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        edges={['top']}
+      >
+        <View
+          style={[
+            styles.header,
+            {
+              paddingHorizontal: theme.spacing.lg,
+              paddingVertical: theme.spacing.md,
+              borderBottomWidth: 1,
+              borderBottomColor: theme.colors.steel,
+            },
+          ]}
+        >
+          <IconButton
+            icon={
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={theme.colors.white}
+              />
+            }
+            onPress={handleBack}
+            variant="ghost"
+            size="medium"
+          />
+          <View style={styles.headerContent}>
+            <Text
+              style={[
+                styles.headerTitle,
+                {
+                  color: theme.colors.white,
+                  fontFamily: theme.typography.fonts.heading,
+                  fontSize: theme.typography.sizes.h2,
+                },
+              ]}
+            >
+              {formatDate(today.date)}
+            </Text>
+          </View>
+          <View style={{ width: 44 }} />
+        </View>
 
-  const formatDuration = (minutes?: number): string => {
-    if (!minutes) return '';
-    return `${minutes} min`;
-  };
+        <View
+          style={[
+            styles.restDayContainer,
+            {
+              padding: theme.spacing.xl,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.restDayTitle,
+              {
+                color: theme.colors.white,
+                fontFamily: theme.typography.fonts.heading,
+                fontSize: theme.typography.sizes.h1,
+                marginBottom: theme.spacing.md,
+              },
+            ]}
+          >
+            Rest day — no workout planned.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-  const formatSetPrescription = (sets: any[]): string => {
-    if (!sets || sets.length === 0) return '';
-    const firstSet = sets[0];
-    const reps = firstSet.targetReps ?? '?';
-    const rpe = firstSet.targetRpe ?? '?';
-    return `${sets.length} x ${reps} @ RPE ${rpe}`;
-  };
+  // Normal workout state
+  if (!today) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        edges={['top', 'bottom']}
+      >
+        <View
+          style={[
+            styles.errorContainer,
+            {
+              padding: theme.spacing.xl,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.errorTitle,
+              {
+                color: theme.colors.white,
+                fontFamily: theme.typography.fonts.heading,
+                fontSize: theme.typography.sizes.h2,
+                marginBottom: theme.spacing.md,
+              },
+            ]}
+          >
+            Workout not found.
+          </Text>
+          <PraxisButton
+            title="Back to Home"
+            onPress={handleBack}
+            size="medium"
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.black }]}
       edges={['top']}
     >
       {/* Header */}
@@ -94,7 +230,7 @@ export default function WorkoutOverviewScreen() {
           icon={
             <Ionicons name="arrow-back" size={24} color={theme.colors.white} />
           }
-          onPress={() => navigation.goBack()}
+          onPress={handleBack}
           variant="ghost"
           size="medium"
         />
@@ -106,39 +242,40 @@ export default function WorkoutOverviewScreen() {
                 color: theme.colors.white,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
+                marginBottom: theme.spacing.xs,
               },
             ]}
           >
-            Today's Workout
+            {formatDate(today.date)}
           </Text>
-          {workoutPlan ? (
-            <Text
-              style={[
-                styles.headerSubtext,
-                {
-                  color: theme.colors.muted,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.bodySmall,
-                },
-              ]}
-            >
-              Day {workoutPlan.dayIndex} — {workoutPlan.focusTags.join(' + ')} —{' '}
-              {workoutPlan.estimatedDurationMinutes} min
-            </Text>
-          ) : (
-            <Text
-              style={[
-                styles.headerSubtext,
-                {
-                  color: theme.colors.muted,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.bodySmall,
-                },
-              ]}
-            >
-              Day 3 — Strength + Engine — 58 min
-            </Text>
+          {/* Focus Tags */}
+          {today.focusTags.length > 0 && (
+            <View style={styles.focusTagsContainer}>
+              {today.focusTags.map((tag, index) => (
+                <Chip
+                  key={index}
+                  label={tag}
+                  variant="accent"
+                  size="small"
+                  style={{ marginRight: theme.spacing.xs }}
+                />
+              ))}
+            </View>
           )}
+          {/* Duration */}
+          <Text
+            style={[
+              styles.duration,
+              {
+                color: theme.colors.muted,
+                fontFamily: theme.typography.fonts.body,
+                fontSize: theme.typography.sizes.bodySmall,
+                marginTop: theme.spacing.xs,
+              },
+            ]}
+          >
+            {today.estimatedDurationMinutes} min
+          </Text>
         </View>
         <View style={{ width: 44 }} />
       </View>
@@ -151,423 +288,181 @@ export default function WorkoutOverviewScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Warmup Block */}
-        <Card variant="elevated" padding="lg">
-          <Text
-            style={[
-              styles.blockTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            WARMUP
-          </Text>
-          {warmupBlock?.warmupItems && warmupBlock.warmupItems.length > 0 ? (
-            warmupBlock.warmupItems.map((item, index) => (
-              <Text
-                key={index}
-                style={[
-                  styles.blockItem,
-                  {
-                    color: theme.colors.white,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.body,
-                    marginBottom:
-                      index < warmupBlock.warmupItems!.length - 1
-                        ? theme.spacing.sm
-                        : 0,
-                  },
-                ]}
-              >
-                • {item}
-              </Text>
-            ))
-          ) : (
-            <>
-              <Text
-                style={[
-                  styles.blockItem,
-                  {
-                    color: theme.colors.white,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.body,
-                    marginBottom: theme.spacing.sm,
-                  },
-                ]}
-              >
-                • Movement Prep (5 min)
-              </Text>
-              <Text
-                style={[
-                  styles.blockItem,
-                  {
-                    color: theme.colors.white,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.body,
-                  },
-                ]}
-              >
-                • Mobility Sequence (3 min)
-              </Text>
-            </>
-          )}
-        </Card>
-
-        <Spacer size="lg" />
-
-        {/* Strength Block */}
-        <Card variant="elevated" padding="lg">
-          <Text
-            style={[
-              styles.blockTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            STRENGTH
-            {strengthBlock?.strengthMain?.exerciseId
-              ? ` — ${getExerciseName(strengthBlock.strengthMain.exerciseId)}`
-              : ' — Back Squat'}
-          </Text>
-
-          {strengthBlock?.strengthMain ? (
-            <Text
-              style={[
-                styles.prescriptionText,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.body,
-                  marginBottom: theme.spacing.md,
-                },
-              ]}
+        {/* Render each block */}
+        {today.blocks.map((block, blockIndex) => (
+          <React.Fragment key={block.id}>
+            <Card
+              variant="elevated"
+              padding="lg"
+              style={{
+                backgroundColor: theme.colors.graphite,
+                borderRadius: theme.radius.lg,
+              }}
             >
-              {formatSetPrescription(strengthBlock.strengthMain.sets)}
-            </Text>
-          ) : (
-            <Text
-              style={[
-                styles.prescriptionText,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.body,
-                  marginBottom: theme.spacing.md,
-                },
-              ]}
-            >
-              3 x 5 @ RPE 8
-            </Text>
-          )}
-
-          <View style={styles.blockActions}>
-            <PraxisButton
-              title="View Details"
-              onPress={handleViewDetails}
-              variant="outline"
-              size="small"
-              style={{ flex: 1, marginRight: theme.spacing.sm }}
-            />
-            <PraxisButton
-              title="Edit Load"
-              onPress={handleEditLoad}
-              variant="outline"
-              size="small"
-              style={{ flex: 1, marginLeft: theme.spacing.sm }}
-            />
-          </View>
-        </Card>
-
-        <Spacer size="lg" />
-
-        {/* Accessory Block */}
-        <Card variant="elevated" padding="lg">
-          <Text
-            style={[
-              styles.blockTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            ACCESSORY
-          </Text>
-
-          {accessoryBlock?.accessory && accessoryBlock.accessory.length > 0 ? (
-            accessoryBlock.accessory.map((exercise, index) => (
               <Text
-                key={index}
                 style={[
-                  styles.blockItem,
+                  styles.blockTitle,
                   {
                     color: theme.colors.white,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.body,
-                    marginBottom:
-                      index < accessoryBlock.accessory!.length - 1
-                        ? theme.spacing.sm
-                        : 0,
+                    fontFamily: theme.typography.fonts.headingMedium,
+                    fontSize: theme.typography.sizes.h3,
+                    marginBottom: theme.spacing.md,
                   },
                 ]}
               >
-                • {getExerciseName(exercise.exerciseId)} —{' '}
-                {formatSetPrescription(exercise.sets)}
+                {block.title}
               </Text>
-            ))
-          ) : (
-            <>
-              <Text
-                style={[
-                  styles.blockItem,
-                  {
-                    color: theme.colors.white,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.body,
-                    marginBottom: theme.spacing.sm,
-                  },
-                ]}
-              >
-                • RDL — 3 x 8
-              </Text>
-              <Text
-                style={[
-                  styles.blockItem,
-                  {
-                    color: theme.colors.white,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.body,
-                  },
-                ]}
-              >
-                • Hanging Knee Raise — 3 x 10
-              </Text>
-            </>
-          )}
-        </Card>
 
-        <Spacer size="lg" />
-
-        {/* Conditioning Block */}
-        <Card variant="elevated" padding="lg">
-          <Text
-            style={[
-              styles.blockTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            CONDITIONING
-            {conditioningBlock?.conditioning?.mode
-              ? ` — ${conditioningBlock.conditioning.mode.charAt(0).toUpperCase() + conditioningBlock.conditioning.mode.slice(1)}`
-              : ' — Intervals'}
-          </Text>
-
-          {conditioningBlock?.conditioning ? (
-            <>
-              {conditioningBlock.conditioning.rounds &&
-              conditioningBlock.conditioning.workSeconds &&
-              conditioningBlock.conditioning.targetZone ? (
+              {/* Block type-specific content */}
+              {block.type === 'strength' && block.strengthMain && (
                 <View>
-                  <Text
-                    style={[
-                      styles.blockItem,
-                      {
-                        color: theme.colors.white,
-                        fontFamily: theme.typography.fonts.body,
-                        fontSize: theme.typography.sizes.body,
-                        marginBottom: theme.spacing.sm,
-                      },
-                    ]}
-                  >
-                    {conditioningBlock.conditioning.rounds} x{' '}
-                    {Math.round(
-                      conditioningBlock.conditioning.workSeconds / 60
-                    )}{' '}
-                    min @ {conditioningBlock.conditioning.targetZone}
-                  </Text>
-                  {conditioningBlock.conditioning.restSeconds && (
+                  {block.strengthMain.sets.length > 0 && (
                     <Text
                       style={[
-                        styles.blockItem,
+                        styles.blockDescription,
                         {
-                          color: theme.colors.muted,
+                          color: theme.colors.white,
                           fontFamily: theme.typography.fonts.body,
-                          fontSize: theme.typography.sizes.bodySmall,
-                          marginBottom: theme.spacing.sm,
+                          fontSize: theme.typography.sizes.body,
                         },
                       ]}
                     >
-                      {Math.round(
-                        conditioningBlock.conditioning.restSeconds / 60
-                      )}{' '}
-                      min rest between sets
-                    </Text>
-                  )}
-                  {conditioningBlock.estimatedDurationMinutes && (
-                    <Text
-                      style={[
-                        styles.blockItem,
-                        {
-                          color: theme.colors.muted,
-                          fontFamily: theme.typography.fonts.body,
-                          fontSize: theme.typography.sizes.bodySmall,
-                        },
-                      ]}
-                    >
-                      Estimated: {conditioningBlock.estimatedDurationMinutes}{' '}
-                      min
+                      {block.strengthMain.sets.length} ×{' '}
+                      {block.strengthMain.sets[0]?.targetReps || '?'} ×{' '}
+                      {block.strengthMain.sets[0]?.targetPercent1RM
+                        ? `${Math.round(
+                            (block.strengthMain.sets[0].targetPercent1RM || 0) *
+                              100
+                          )}%`
+                        : 'RPE ' +
+                          (block.strengthMain.sets[0]?.targetRpe || '?')}
                     </Text>
                   )}
                 </View>
-              ) : (
+              )}
+
+              {block.type === 'accessory' && block.accessory && (
+                <View>
+                  {block.accessory.map((exercise, index) => (
+                    <Text
+                      key={index}
+                      style={[
+                        styles.blockDescription,
+                        {
+                          color: theme.colors.white,
+                          fontFamily: theme.typography.fonts.body,
+                          fontSize: theme.typography.sizes.bodySmall,
+                          marginBottom:
+                            index < block.accessory!.length - 1
+                              ? theme.spacing.sm
+                              : 0,
+                        },
+                      ]}
+                    >
+                      • {exercise.exerciseId} — {exercise.sets.length} ×{' '}
+                      {exercise.sets[0]?.targetReps || '?'}
+                    </Text>
+                  ))}
+                </View>
+              )}
+
+              {block.type === 'conditioning' && block.conditioning && (
                 <Text
                   style={[
-                    styles.blockItem,
+                    styles.blockDescription,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.white,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.body,
                     },
                   ]}
                 >
-                  {conditioningBlock.conditioning.notes ||
-                    'No details available'}
+                  {block.conditioning.rounds || '?'} rounds —{' '}
+                  {block.conditioning.workSeconds
+                    ? `${Math.round(block.conditioning.workSeconds / 60)}s`
+                    : '?'}{' '}
+                  on /{' '}
+                  {block.conditioning.restSeconds
+                    ? `${Math.round(block.conditioning.restSeconds / 60)}s`
+                    : '?'}{' '}
+                  off @ {block.conditioning.targetZone || 'Z?'}
                 </Text>
               )}
-            </>
-          ) : (
-            <>
-              <Text
-                style={[
-                  styles.blockItem,
-                  {
-                    color: theme.colors.white,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.body,
-                    marginBottom: theme.spacing.sm,
-                  },
-                ]}
-              >
-                4 x 4 min @ Zone 4
-              </Text>
-              <Text
-                style={[
-                  styles.blockItem,
-                  {
-                    color: theme.colors.muted,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.bodySmall,
-                    marginBottom: theme.spacing.sm,
-                  },
-                ]}
-              >
-                2 min rest between sets
-              </Text>
-              <Text
-                style={[
-                  styles.blockItem,
-                  {
-                    color: theme.colors.muted,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.bodySmall,
-                  },
-                ]}
-              >
-                Estimated: 18 min
-              </Text>
-            </>
-          )}
-        </Card>
 
-        <Spacer size="lg" />
+              {block.type === 'warmup' && block.warmupItems && (
+                <View>
+                  {block.warmupItems.map((item, index) => (
+                    <Text
+                      key={index}
+                      style={[
+                        styles.blockDescription,
+                        {
+                          color: theme.colors.white,
+                          fontFamily: theme.typography.fonts.body,
+                          fontSize: theme.typography.sizes.bodySmall,
+                          marginBottom:
+                            index < block.warmupItems!.length - 1
+                              ? theme.spacing.sm
+                              : 0,
+                        },
+                      ]}
+                    >
+                      • {item}
+                    </Text>
+                  ))}
+                </View>
+              )}
 
-        {/* Cooldown Block */}
-        <Card variant="elevated" padding="lg">
-          <Text
-            style={[
-              styles.blockTitle,
-              {
-                color: theme.colors.white,
-                fontFamily: theme.typography.fonts.headingMedium,
-                fontSize: theme.typography.sizes.h3,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            COOLDOWN
-          </Text>
-          {cooldownBlock?.cooldownItems &&
-          cooldownBlock.cooldownItems.length > 0 ? (
-            cooldownBlock.cooldownItems.map((item, index) => (
-              <Text
-                key={index}
-                style={[
-                  styles.blockItem,
-                  {
-                    color: theme.colors.white,
-                    fontFamily: theme.typography.fonts.body,
-                    fontSize: theme.typography.sizes.body,
-                    marginBottom:
-                      index < cooldownBlock.cooldownItems!.length - 1
-                        ? theme.spacing.sm
-                        : 0,
-                  },
-                ]}
-              >
-                • {item}
-              </Text>
-            ))
-          ) : (
-            <Text
-              style={[
-                styles.blockItem,
-                {
-                  color: theme.colors.white,
-                  fontFamily: theme.typography.fonts.body,
-                  fontSize: theme.typography.sizes.body,
-                },
-              ]}
-            >
-              • Stretching & Breath Work (4 min)
-            </Text>
-          )}
-        </Card>
+              {block.type === 'cooldown' && block.cooldownItems && (
+                <View>
+                  {block.cooldownItems.map((item, index) => (
+                    <Text
+                      key={index}
+                      style={[
+                        styles.blockDescription,
+                        {
+                          color: theme.colors.white,
+                          fontFamily: theme.typography.fonts.body,
+                          fontSize: theme.typography.sizes.bodySmall,
+                          marginBottom:
+                            index < block.cooldownItems!.length - 1
+                              ? theme.spacing.sm
+                              : 0,
+                        },
+                      ]}
+                    >
+                      • {item}
+                    </Text>
+                  ))}
+                </View>
+              )}
+            </Card>
+            {blockIndex < today.blocks.length - 1 && <Spacer size="lg" />}
+          </React.Fragment>
+        ))}
 
         <Spacer size="xl" />
       </ScrollView>
 
       {/* Primary CTA */}
-      <View
-        style={[
-          styles.footer,
-          {
-            padding: theme.spacing.lg,
-            borderTopWidth: 1,
-            borderTopColor: theme.colors.steel,
-          },
-        ]}
-      >
-        <PraxisButton
-          title="Begin Session"
-          onPress={handleBeginSession}
-          size="large"
-        />
-      </View>
+      {today.blocks.length > 0 && (
+        <View
+          style={[
+            styles.footer,
+            {
+              padding: theme.spacing.lg,
+              borderTopWidth: 1,
+              borderTopColor: theme.colors.steel,
+            },
+          ]}
+        >
+          <PraxisButton
+            title="Begin Workout"
+            onPress={handleBeginWorkout}
+            size="large"
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -587,10 +482,15 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontWeight: '700',
-    marginBottom: 4,
   },
-  headerSubtext: {
-    textAlign: 'center',
+  focusTagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  duration: {
+    fontWeight: '400',
   },
   scrollView: {
     flex: 1,
@@ -602,17 +502,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
   },
-  blockItem: {
+  blockDescription: {
     lineHeight: 22,
-  },
-  prescriptionText: {
-    fontWeight: '500',
-  },
-  blockActions: {
-    flexDirection: 'row',
-    width: '100%',
   },
   footer: {
     width: '100%',
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorTitle: {
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  restDayContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  restDayTitle: {
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });
