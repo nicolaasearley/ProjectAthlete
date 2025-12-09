@@ -5,8 +5,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@theme/*": ["./src/theme/*"],
+      "@core/*": ["./src/core/*"],
+      "@components/*": ["./src/components/*"],
+      "@engine/*": ["./src/engine/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@screens/*": ["./src/screens/*"],
       "@app/*": ["./app/*"]
     },
-    "types": ["node"]
+    "types": ["node", "jest"]
   }
 }

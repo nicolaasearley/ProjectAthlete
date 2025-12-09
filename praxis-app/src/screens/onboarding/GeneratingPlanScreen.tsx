@@ -6,6 +6,7 @@ import { useTheme } from '../../../theme';
 import { useUserStore, usePlanStore } from '../../../core/store';
 import { generateInitialPlan } from '../../../core/engine';
 import dayjs from 'dayjs';
+import { trackEvent, trackScreen } from '../../../core/analytics';
 
 export default function GeneratingPlanScreen() {
   const theme = useTheme();
@@ -13,6 +14,11 @@ export default function GeneratingPlanScreen() {
   const { setPlanDays } = usePlanStore();
 
   useEffect(() => {
+    trackScreen('generating_plan');
+    trackEvent('plan_generation_started', {
+      hasProfile: Boolean(userProfile),
+    });
+
     const generateAndNavigate = async () => {
       try {
         if (!userProfile) {
@@ -32,9 +38,14 @@ export default function GeneratingPlanScreen() {
           try {
             const planDays = generateInitialPlan(userProfile, startDate);
             setPlanDays(planDays);
+            trackEvent('plan_generation_completed', {
+              status: 'success',
+              daysGenerated: planDays.length,
+            });
           } catch (error) {
             // Engine not implemented yet, continue with empty plan
             console.log('Plan generation not yet implemented, continuing...');
+            trackEvent('plan_generation_completed', { status: 'fallback' });
           }
 
           // Navigate to Home screen
@@ -43,6 +54,7 @@ export default function GeneratingPlanScreen() {
       } catch (error) {
         console.error('Error generating plan:', error);
         // Navigate anyway after delay
+        trackEvent('plan_generation_completed', { status: 'error' });
         setTimeout(() => {
           router.replace('/home');
         }, 2000);
