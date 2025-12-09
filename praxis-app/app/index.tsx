@@ -1,5 +1,5 @@
 import { Redirect } from 'expo-router';
-import { useUserStore } from '../src/core/store';
+import { useUserStore } from '@core/store';
 
 export default function Index() {
   const { hasCompletedOnboarding } = useUserStore();

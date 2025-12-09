@@ -16,10 +16,10 @@ module.exports = function (api) {
             '@engine': './src/engine',
             '@utils': './src/utils',
             '@screens': './src/screens',
+            '@app': './app',
           },
         },
       ],
     ],
   };
 };
-
