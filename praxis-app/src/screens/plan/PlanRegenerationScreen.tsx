@@ -9,19 +9,16 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import type { StackNavigationProp } from '@react-navigation/stack';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { Card, IconButton, PraxisButton, Spacer } from '../../components';
-import { useUserStore, usePlanStore } from '../../../core/store';
-
-type MainStackParamList = {
-  Home: undefined;
-  WorkoutOverview: undefined;
-};
-
-type NavigationProp = StackNavigationProp<MainStackParamList>;
+import { useTheme } from '@theme';
+import { Card, IconButton, PraxisButton, Spacer } from '@components';
+import { useUserStore, usePlanStore } from '@core/store';
+import type { WorkoutPlanDay } from '@core/types';
+import { generateDailyWorkout as generateDailyWorkoutEngine } from '@engine/generation/generateDailyWorkout';
+import { generateMicrocycle } from '@engine/generation/generateMicrocycle';
+import { generateTrainingCycle } from '@engine/generation/generateTrainingCycle';
+import dayjs from 'dayjs';
 
 type RegenerationType = 'today' | 'week' | 'fullCycle' | 'readinessTrend';
 
@@ -34,9 +31,8 @@ interface RegenerationOption {
 
 export default function PlanRegenerationScreen() {
   const theme = useTheme();
-  const navigation = useNavigation<NavigationProp>();
-  const { readinessHistory } = useUserStore();
-  const { setPlanDays } = usePlanStore();
+  const { readinessHistory, preferences, strengthNumbers } = useUserStore();
+  const { setPlanDays, setPlan, plan, getTodayPlan } = usePlanStore();
 
   const [confirmationModalVisible, setConfirmationModalVisible] =
     useState(false);
@@ -83,34 +79,144 @@ export default function PlanRegenerationScreen() {
     },
   ];
 
-  // TODO: Implement actual plan generation logic
-  const generateDailyWorkout = async (): Promise<void> => {
-    // TODO: Call engine.generateDailyWorkout() with current readiness
-    // TODO: Update usePlanStore with new workout
-    return new Promise((resolve) => setTimeout(resolve, 1500));
+  // Generate today's workout
+  const generateDailyWorkout = async (): Promise<WorkoutPlanDay> => {
+    console.log("Running daily workout generation");
+    
+    const today = dayjs().format('YYYY-MM-DD');
+    const workout = generateDailyWorkoutEngine({
+      goal: preferences.goal || 'hybrid',
+      experienceLevel: preferences.experienceLevel || 'intermediate',
+      equipmentIds: preferences.equipmentIds || [],
+      units: 'metric', // TODO: Get from user store
+      strengthNumbers: Object.keys(strengthNumbers).length > 0 ? strengthNumbers : undefined,
+    });
+
+    // Remove ALL existing workouts for today to prevent duplicates
+    const planWithoutToday = plan.filter(day => day.date !== today);
+    
+    // Add the new workout for today
+    const updatedPlan = [...planWithoutToday, workout];
+
+    setPlanDays(updatedPlan);
+    console.log("Generated daily workout:", workout);
+    
+    return workout;
   };
 
-  const generateWeeklyPlan = async (): Promise<void> => {
-    // TODO: Call engine.generateWeeklyPlan() with current preferences
-    // TODO: Update usePlanStore.setPlanDays() with new week
-    return new Promise((resolve) => setTimeout(resolve, 1500));
+  // Generate weekly plan
+  const generateWeeklyPlan = async (): Promise<WorkoutPlanDay[]> => {
+    console.log("Running weekly plan generation");
+    
+    const today = dayjs().format('YYYY-MM-DD');
+    const weekStart = dayjs().startOf('week').format('YYYY-MM-DD');
+    
+    const microcycle = generateMicrocycle({
+      startDate: weekStart,
+      goal: preferences.goal || 'hybrid',
+      experienceLevel: preferences.experienceLevel || 'intermediate',
+      trainingDaysPerWeek: preferences.trainingDaysPerWeek || 4,
+      equipmentIds: preferences.equipmentIds || [],
+      units: 'metric',
+      strengthNumbers: Object.keys(strengthNumbers).length > 0 ? strengthNumbers : undefined,
+    });
+
+    // Merge with existing plan, replacing this week's days
+    // Remove ALL days within the week range to prevent duplicates
+    const existingPlan = plan.filter(day => {
+      const dayDate = dayjs(day.date);
+      const weekStartDate = dayjs(weekStart);
+      const weekEndDate = dayjs(weekStart).add(6, 'days');
+      // Keep only days outside the week range
+      return dayDate.isBefore(weekStartDate, 'day') || dayDate.isAfter(weekEndDate, 'day');
+    });
+
+    // Combine existing plan with new microcycle and sort by date
+    const updatedPlan = [...existingPlan, ...microcycle].sort((a, b) => 
+      dayjs(a.date).diff(dayjs(b.date))
+    );
+
+    setPlanDays(updatedPlan);
+    console.log("Generated weekly plan:", microcycle);
+    
+    return microcycle;
   };
 
-  const generateFullCycle = async (): Promise<void> => {
-    // TODO: Call engine.generateInitialPlan() with updated preferences/history
-    // TODO: Update usePlanStore.setPlanDays() with full cycle
-    return new Promise((resolve) => setTimeout(resolve, 1500));
+  // Generate full cycle
+  const generateFullCycle = async (): Promise<WorkoutPlanDay[]> => {
+    console.log("Running full cycle generation");
+    
+    const today = dayjs().format('YYYY-MM-DD');
+    
+    const cycle = generateTrainingCycle({
+      startDate: today,
+      goal: preferences.goal || 'hybrid',
+      experienceLevel: preferences.experienceLevel || 'intermediate',
+      trainingDaysPerWeek: preferences.trainingDaysPerWeek || 4,
+      equipmentIds: preferences.equipmentIds || [],
+      units: 'metric',
+      weeks: 4,
+      strengthNumbers: Object.keys(strengthNumbers).length > 0 ? strengthNumbers : undefined,
+    });
+
+    // Flatten the weeks array into a single array
+    const fullPlan = cycle.weeks.flat();
+
+    setPlan(fullPlan);
+    console.log("Generated cycle:", cycle);
+    console.log("Generated full plan:", fullPlan);
+    
+    return fullPlan;
   };
 
-  const generateTrendAdjustedCycle = async (): Promise<void> => {
-    // TODO: Call engine.generateTrendAdjustedCycle() with readinessHistory
-    // TODO: Update usePlanStore.setPlanDays() with adjusted plan
-    return new Promise((resolve) => setTimeout(resolve, 1500));
+  // Generate trend-adjusted cycle
+  const generateTrendAdjustedCycle = async (): Promise<WorkoutPlanDay[]> => {
+    console.log("Running trend-adjusted cycle generation");
+    
+    const today = dayjs().format('YYYY-MM-DD');
+    
+    // For now, use the same generation as full cycle
+    // TODO: Implement actual trend adjustment logic
+    const cycle = generateTrainingCycle({
+      startDate: today,
+      goal: preferences.goal || 'hybrid',
+      experienceLevel: preferences.experienceLevel || 'intermediate',
+      trainingDaysPerWeek: preferences.trainingDaysPerWeek || 4,
+      equipmentIds: preferences.equipmentIds || [],
+      units: 'metric',
+      weeks: 4,
+      strengthNumbers: Object.keys(strengthNumbers).length > 0 ? strengthNumbers : undefined,
+    });
+
+    // Flatten the weeks array into a single array
+    const fullPlan = cycle.weeks.flat();
+
+    setPlan(fullPlan);
+    console.log("Generated trend-adjusted cycle:", cycle);
+    console.log("Generated trend-adjusted plan:", fullPlan);
+    
+    return fullPlan;
   };
 
   const handleRegenerationPress = (type: RegenerationType) => {
     setSelectedRegenerationType(type);
     setConfirmationModalVisible(true);
+  };
+
+  // Helper function to navigate to today's workout after regeneration
+  const navigateToTodayWorkout = () => {
+    const todayWorkout = getTodayPlan();
+    
+    if (todayWorkout) {
+      console.log('[PlanRegenerationScreen] Navigating to today workout:', todayWorkout.id);
+      router.replace({
+        pathname: '/workout/overview',
+        params: { planDayId: todayWorkout.id },
+      });
+    } else {
+      console.log('[PlanRegenerationScreen] No workout found for today, navigating to /start');
+      router.replace('/start');
+    }
   };
 
   const handleConfirmRegeneration = async () => {
@@ -121,24 +227,25 @@ export default function PlanRegenerationScreen() {
       switch (selectedRegenerationType) {
         case 'today':
           await generateDailyWorkout();
-          navigation.navigate('WorkoutOverview');
+          navigateToTodayWorkout();
           break;
         case 'week':
           await generateWeeklyPlan();
-          navigation.navigate('Home');
+          navigateToTodayWorkout();
           break;
         case 'fullCycle':
           await generateFullCycle();
-          navigation.navigate('Home');
+          navigateToTodayWorkout();
           break;
         case 'readinessTrend':
           await generateTrendAdjustedCycle();
-          navigation.navigate('Home');
+          navigateToTodayWorkout();
           break;
       }
     } catch (error) {
-      console.error('Error regenerating plan:', error);
-      // TODO: Show error message to user
+      console.error('[PlanRegenerationScreen] Error regenerating plan:', error);
+      // Navigate to start on error as fallback
+      router.replace('/start');
     } finally {
       setLoadingModalVisible(false);
     }
@@ -155,7 +262,7 @@ export default function PlanRegenerationScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -166,7 +273,7 @@ export default function PlanRegenerationScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -174,7 +281,7 @@ export default function PlanRegenerationScreen() {
           icon={
             <Ionicons name="arrow-back" size={24} color={theme.colors.white} />
           }
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
           variant="ghost"
           size="medium"
         />
@@ -183,7 +290,7 @@ export default function PlanRegenerationScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -226,7 +333,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.introTitle,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.headingMedium,
                   fontSize: theme.typography.sizes.h3,
                   marginBottom: theme.spacing.md,
@@ -239,7 +346,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.introBody,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom: theme.spacing.md,
@@ -254,7 +361,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.introSubtitle,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.bodySmall,
                   textAlign: 'center',
@@ -282,7 +389,7 @@ export default function PlanRegenerationScreen() {
                 style={[
                   styles.optionTitle,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.headingMedium,
                     fontSize: theme.typography.sizes.body,
                     marginBottom: theme.spacing.xs,
@@ -295,7 +402,7 @@ export default function PlanRegenerationScreen() {
                 style={[
                   styles.optionSubtitle,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.bodySmall,
                   },
@@ -317,7 +424,7 @@ export default function PlanRegenerationScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -333,7 +440,7 @@ export default function PlanRegenerationScreen() {
               {
                 paddingVertical: theme.spacing.sm,
                 borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
+                borderBottomColor: theme.colors.surface3,
               },
             ]}
           >
@@ -341,7 +448,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.readinessLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -369,7 +476,7 @@ export default function PlanRegenerationScreen() {
               {
                 paddingVertical: theme.spacing.sm,
                 borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
+                borderBottomColor: theme.colors.surface3,
               },
             ]}
           >
@@ -377,7 +484,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.readinessLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -405,7 +512,7 @@ export default function PlanRegenerationScreen() {
               {
                 paddingVertical: theme.spacing.sm,
                 borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
+                borderBottomColor: theme.colors.surface3,
               },
             ]}
           >
@@ -413,7 +520,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.readinessLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -425,7 +532,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.readinessValue,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.bodyMedium,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -448,7 +555,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.readinessLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -460,7 +567,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.readinessValue,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.bodyMedium,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -492,7 +599,7 @@ export default function PlanRegenerationScreen() {
             style={[
               styles.modalContent,
               {
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.xl,
                 padding: theme.spacing.xxxl,
               },
@@ -502,7 +609,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.modalTitle,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.headingMedium,
                   fontSize: theme.typography.sizes.h3,
                   marginBottom: theme.spacing.xl,
@@ -550,7 +657,7 @@ export default function PlanRegenerationScreen() {
               style={[
                 styles.loadingText,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },

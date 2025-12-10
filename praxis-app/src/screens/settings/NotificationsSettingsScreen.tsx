@@ -4,9 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { PraxisButton, IconButton, Card, Spacer } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { PraxisButton, IconButton, Card, Spacer } from '@components';
+import { useUserStore } from '@core/store';
 
 type MainStackParamList = {
   Settings: undefined;
@@ -83,7 +83,7 @@ export default function NotificationsSettingsScreen() {
           {
             paddingVertical: theme.spacing.md,
             borderBottomWidth: isLast ? 0 : 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -91,7 +91,7 @@ export default function NotificationsSettingsScreen() {
           style={[
             styles.switchLabel,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.body,
               fontSize: theme.typography.sizes.body,
               flex: 1,
@@ -104,11 +104,11 @@ export default function NotificationsSettingsScreen() {
           value={value}
           onValueChange={onValueChange}
           trackColor={{
-            false: theme.colors.graphite,
+            false: theme.colors.surface2,
             true: theme.colors.acidGreen + '80', // Add opacity for track
           }}
           thumbColor={value ? theme.colors.acidGreen : theme.colors.mutedDark}
-          ios_backgroundColor={theme.colors.graphite}
+          ios_backgroundColor={theme.colors.surface2}
         />
       </View>
     );
@@ -116,7 +116,7 @@ export default function NotificationsSettingsScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -127,7 +127,7 @@ export default function NotificationsSettingsScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -144,7 +144,7 @@ export default function NotificationsSettingsScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -212,7 +212,7 @@ export default function NotificationsSettingsScreen() {
           {
             padding: theme.spacing.lg,
             borderTopWidth: 1,
-            borderTopColor: theme.colors.steel,
+            borderTopColor: theme.colors.surface3,
           },
         ]}
       >
@@ -222,7 +222,7 @@ export default function NotificationsSettingsScreen() {
           style={[
             styles.permissionsNote,
             {
-              color: theme.colors.muted,
+              color: theme.colors.textMuted,
               fontFamily: theme.typography.fonts.body,
               fontSize: theme.typography.sizes.bodySmall,
               marginTop: theme.spacing.md,

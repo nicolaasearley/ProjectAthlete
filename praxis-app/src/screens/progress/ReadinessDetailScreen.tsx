@@ -4,9 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { Card, IconButton, Spacer } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { Card, IconButton, Spacer } from '@components';
+import { useUserStore } from '@core/store';
 
 type MainStackParamList = {
   Progress: undefined;
@@ -68,7 +68,7 @@ export default function ReadinessDetailScreen() {
             flexDirection: 'row',
             width: 100,
             height: 8,
-            backgroundColor: theme.colors.steel,
+            backgroundColor: theme.colors.surface3,
             borderRadius: theme.radius.sm,
             overflow: 'hidden',
           },
@@ -94,7 +94,7 @@ export default function ReadinessDetailScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -105,7 +105,7 @@ export default function ReadinessDetailScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -122,7 +122,7 @@ export default function ReadinessDetailScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -152,7 +152,7 @@ export default function ReadinessDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.xs,
@@ -165,7 +165,7 @@ export default function ReadinessDetailScreen() {
             style={[
               styles.sectionSubtitle,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
                 marginBottom: theme.spacing.lg,
@@ -180,7 +180,7 @@ export default function ReadinessDetailScreen() {
             style={[
               styles.chartPlaceholder,
               {
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.md,
                 padding: theme.spacing.xxxl,
                 marginBottom: theme.spacing.lg,
@@ -194,7 +194,7 @@ export default function ReadinessDetailScreen() {
               style={[
                 styles.chartPlaceholderText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -219,7 +219,7 @@ export default function ReadinessDetailScreen() {
                 style={[
                   styles.statLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -252,7 +252,7 @@ export default function ReadinessDetailScreen() {
                 style={[
                   styles.statLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -279,7 +279,7 @@ export default function ReadinessDetailScreen() {
                 style={[
                   styles.statLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -291,7 +291,7 @@ export default function ReadinessDetailScreen() {
                 style={[
                   styles.statValue,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -314,7 +314,7 @@ export default function ReadinessDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -332,7 +332,7 @@ export default function ReadinessDetailScreen() {
                 {
                   paddingVertical: theme.spacing.md,
                   borderBottomWidth: index < mockFactors.length - 1 ? 1 : 0,
-                  borderBottomColor: theme.colors.steel,
+                  borderBottomColor: theme.colors.surface3,
                 },
               ]}
             >
@@ -340,7 +340,7 @@ export default function ReadinessDetailScreen() {
                 style={[
                   styles.factorLabel,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                     flex: 1,
@@ -381,7 +381,7 @@ export default function ReadinessDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -397,7 +397,7 @@ export default function ReadinessDetailScreen() {
               style={[
                 styles.trendText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom:
@@ -421,7 +421,7 @@ export default function ReadinessDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -437,7 +437,7 @@ export default function ReadinessDetailScreen() {
               style={[
                 styles.insightText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom:
@@ -461,7 +461,7 @@ export default function ReadinessDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -477,7 +477,7 @@ export default function ReadinessDetailScreen() {
               {
                 paddingVertical: theme.spacing.md,
                 borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
+                borderBottomColor: theme.colors.surface3,
                 opacity: 0.4,
               },
             ]}
@@ -486,7 +486,7 @@ export default function ReadinessDetailScreen() {
               style={[
                 styles.futureFeatureLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -502,7 +502,7 @@ export default function ReadinessDetailScreen() {
               {
                 paddingVertical: theme.spacing.md,
                 borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
+                borderBottomColor: theme.colors.surface3,
                 opacity: 0.4,
               },
             ]}
@@ -511,7 +511,7 @@ export default function ReadinessDetailScreen() {
               style={[
                 styles.futureFeatureLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -527,7 +527,7 @@ export default function ReadinessDetailScreen() {
               {
                 paddingVertical: theme.spacing.md,
                 borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
+                borderBottomColor: theme.colors.surface3,
                 opacity: 0.4,
               },
             ]}
@@ -536,7 +536,7 @@ export default function ReadinessDetailScreen() {
               style={[
                 styles.futureFeatureLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -559,7 +559,7 @@ export default function ReadinessDetailScreen() {
               style={[
                 styles.futureFeatureLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },

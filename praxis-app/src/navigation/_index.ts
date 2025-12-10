@@ -1,2 +1,2 @@
-// Navigation utilities and configuration
-export { default as AppNavigator } from './AppNavigator';
+// Navigation exports
+// AppNavigator removed - using Expo Router instead

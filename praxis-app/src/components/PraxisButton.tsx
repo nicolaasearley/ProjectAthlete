@@ -7,7 +7,7 @@ import {
   TextStyle,
   ActivityIndicator,
 } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme } from '@theme';
 
 interface PraxisButtonProps {
   title: string;
@@ -36,7 +36,7 @@ export default function PraxisButton({
 
   const getButtonStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
-      borderRadius: theme.radius.md,
+      borderRadius: theme.radius.xl,
       alignItems: 'center',
       justifyContent: 'center',
       flexDirection: 'row',
@@ -56,13 +56,13 @@ export default function PraxisButton({
 
     // Variant styles
     if (variant === 'primary') {
-      baseStyle.backgroundColor = theme.colors.acidGreen;
+      baseStyle.backgroundColor = theme.colors.primary;
     } else if (variant === 'secondary') {
-      baseStyle.backgroundColor = theme.colors.graphite;
+      baseStyle.backgroundColor = theme.colors.surface2;
     } else if (variant === 'outline') {
       baseStyle.backgroundColor = 'transparent';
       baseStyle.borderWidth = 1;
-      baseStyle.borderColor = theme.colors.acidGreen;
+      baseStyle.borderColor = theme.colors.primary;
     } else if (variant === 'ghost') {
       baseStyle.backgroundColor = 'transparent';
     }
@@ -85,11 +85,11 @@ export default function PraxisButton({
     }
 
     if (variant === 'primary') {
-      baseStyle.color = theme.colors.black;
+      baseStyle.color = theme.colors.textPrimary;
     } else if (variant === 'secondary') {
-      baseStyle.color = theme.colors.white;
+      baseStyle.color = theme.colors.textPrimary;
     } else if (variant === 'outline' || variant === 'ghost') {
-      baseStyle.color = theme.colors.acidGreen;
+      baseStyle.color = theme.colors.primary;
     }
 
     if (disabled) {
@@ -109,7 +109,7 @@ export default function PraxisButton({
       {loading ? (
         <ActivityIndicator
           color={
-            variant === 'primary' ? theme.colors.black : theme.colors.acidGreen
+            variant === 'primary' ? theme.colors.textPrimary : theme.colors.primary
           }
           size="small"
         />

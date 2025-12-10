@@ -6,7 +6,7 @@ import type {
   AccessoryExercisePrescription,
   ConditioningPrescription,
   SetPrescription,
-} from '../../core/types';
+} from '@core/types';
 
 interface AdjustWorkoutParams {
   workout: WorkoutPlanDay;
@@ -246,8 +246,21 @@ export function adjustWorkoutForToday(
 
   // TODO: Support modifying rest intervals globally
   // TODO: Support swapping movements on very low readiness days
+  //   - If readiness < 30, consider swapping main lift to a lighter variation
+  //   - Use EXERCISES library to find alternative exercises with same pattern but lower difficulty
   // TODO: Integrate user equipment limitations
   // TODO: Integrate soreness-specific scaling by body region
+  //   - Map exercise primaryMuscles to soreness inputs
+  //   - Reduce volume/intensity for affected muscle groups
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[AdaptationEngine] Adjusted workout for readiness:', {
+      readinessScore,
+      adaptationMode,
+      finalScaler: finalScaler.toFixed(2),
+      blocksAdjusted: adjustedBlocks.length,
+    });
+  }
 
   return adjustedWorkout;
 }

@@ -1,2 +1,1 @@
-export { default } from '@screens/plan/PlanRegenerationScreen';
-
+export { default } from '@/screens/plan/PlanRegenerationScreen';

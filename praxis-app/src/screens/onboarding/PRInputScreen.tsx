@@ -9,9 +9,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useTheme } from '../../../theme';
-import { PraxisButton } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { PraxisButton } from '@components';
+import { useUserStore } from '@core/store';
 
 export default function PRInputScreen() {
   const theme = useTheme();
@@ -50,7 +50,7 @@ export default function PRInputScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top', 'bottom']}
     >
       <KeyboardAvoidingView
@@ -71,7 +71,7 @@ export default function PRInputScreen() {
             style={[
               styles.title,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.xxxl,
@@ -89,7 +89,7 @@ export default function PRInputScreen() {
                 style={[
                   styles.label,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.bodySmall,
                     marginBottom: theme.spacing.sm,
@@ -102,9 +102,9 @@ export default function PRInputScreen() {
                 style={[
                   styles.input,
                   {
-                    backgroundColor: theme.colors.graphite,
-                    borderColor: theme.colors.steel,
-                    color: theme.colors.white,
+                    backgroundColor: theme.colors.surface2,
+                    borderColor: theme.colors.surface3,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                     borderRadius: theme.radius.md,
@@ -127,7 +127,7 @@ export default function PRInputScreen() {
                 style={[
                   styles.label,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.bodySmall,
                     marginBottom: theme.spacing.sm,
@@ -140,9 +140,9 @@ export default function PRInputScreen() {
                 style={[
                   styles.input,
                   {
-                    backgroundColor: theme.colors.graphite,
-                    borderColor: theme.colors.steel,
-                    color: theme.colors.white,
+                    backgroundColor: theme.colors.surface2,
+                    borderColor: theme.colors.surface3,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                     borderRadius: theme.radius.md,
@@ -165,7 +165,7 @@ export default function PRInputScreen() {
                 style={[
                   styles.label,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.bodySmall,
                     marginBottom: theme.spacing.sm,
@@ -178,9 +178,9 @@ export default function PRInputScreen() {
                 style={[
                   styles.input,
                   {
-                    backgroundColor: theme.colors.graphite,
-                    borderColor: theme.colors.steel,
-                    color: theme.colors.white,
+                    backgroundColor: theme.colors.surface2,
+                    borderColor: theme.colors.surface3,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                     borderRadius: theme.radius.md,

@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type {
   DistanceUnit,
   PRRecord,
@@ -18,6 +20,8 @@ export interface UserState {
   currentReadiness: ReadinessEntry | null;
   readinessHistory: ReadinessEntry[];
   personalRecords: PRRecord[];
+  _hasHydrated: boolean;
+  setHasHydrated: (hydrated: boolean) => void;
   setUserProfile: (profile: UserProfile) => void;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
   updatePreferences: (preferences: Partial<TrainingPreferences> | {
@@ -42,6 +46,7 @@ export interface UserState {
   updatePersonalRecord: (id: string, updates: Partial<PRRecord>) => void;
   setPersonalRecords: (prs: PRRecord[]) => void;
   removePersonalRecord: (id: string) => void;
+  hasProfile: () => boolean;
 }
 
 const defaultPreferences: TrainingPreferences = {
@@ -54,16 +59,20 @@ const defaultPreferences: TrainingPreferences = {
   readinessScalingEnabled: true,
 };
 
-export const useUserStore = create<UserState>((set) => ({
-  userProfile: null,
-  preferences: defaultPreferences,
-  strengthNumbers: {},
-  distanceUnits: 'kilometers',
-  isAuthenticated: false,
-  hasCompletedOnboarding: false,
-  currentReadiness: null,
-  readinessHistory: [],
-  personalRecords: [],
+export const useUserStore = create<UserState>()(
+  persist(
+    (set, get) => ({
+      userProfile: null,
+      preferences: defaultPreferences,
+      strengthNumbers: {},
+      distanceUnits: 'kilometers',
+      isAuthenticated: false,
+      hasCompletedOnboarding: false,
+      currentReadiness: null,
+      readinessHistory: [],
+      personalRecords: [],
+      _hasHydrated: false,
+      setHasHydrated: (hydrated: boolean) => set({ _hasHydrated: hydrated }),
 
   setUserProfile: (profile) =>
     set({
@@ -106,40 +115,47 @@ export const useUserStore = create<UserState>((set) => ({
 
   updatePreferences: (preferences) =>
     set((state) => {
+      console.log('[useUserStore] updatePreferences called with:', preferences);
       // Handle onboarding-style updates with field name mapping
       const mappedPrefs: Partial<TrainingPreferences> = {};
       
       if ('goal' in preferences && preferences.goal !== undefined) {
         mappedPrefs.goal = preferences.goal as TrainingPreferences['goal'];
+        console.log('[useUserStore] Mapped goal:', mappedPrefs.goal);
       }
       if ('experienceLevel' in preferences && preferences.experienceLevel !== undefined) {
         mappedPrefs.experienceLevel = preferences.experienceLevel as TrainingPreferences['experienceLevel'];
+        console.log('[useUserStore] Mapped experienceLevel:', mappedPrefs.experienceLevel);
       }
       if ('experience' in preferences && preferences.experience !== undefined) {
         mappedPrefs.experienceLevel = preferences.experience as TrainingPreferences['experienceLevel'];
+        console.log('[useUserStore] Mapped experience -> experienceLevel:', mappedPrefs.experienceLevel);
       }
-      if ('timeAvailability' in preferences && preferences.timeAvailability !== undefined) {
+      if ('timeAvailability' in preferences && preferences.timeAvailability !== undefined && preferences.timeAvailability !== null) {
         const timeValue = preferences.timeAvailability;
         if (typeof timeValue === 'string') {
           mappedPrefs.timeAvailability = timeValue as TrainingPreferences['timeAvailability'];
         } else if (typeof timeValue === 'number') {
           // Convert number back to string if needed
           mappedPrefs.timeAvailability = timeValue === 1 ? 'short' : timeValue === 2 ? 'standard' : 'full';
-        } else {
-          mappedPrefs.timeAvailability = timeValue as TrainingPreferences['timeAvailability'];
         }
+        console.log('[useUserStore] Mapped timeAvailability:', mappedPrefs.timeAvailability);
       }
       if ('trainingDaysPerWeek' in preferences && preferences.trainingDaysPerWeek !== undefined) {
         mappedPrefs.trainingDaysPerWeek = preferences.trainingDaysPerWeek as number;
+        console.log('[useUserStore] Mapped trainingDaysPerWeek:', mappedPrefs.trainingDaysPerWeek);
       }
       if ('trainingDays' in preferences && preferences.trainingDays !== undefined) {
         mappedPrefs.trainingDaysPerWeek = preferences.trainingDays as number;
+        console.log('[useUserStore] Mapped trainingDays -> trainingDaysPerWeek:', mappedPrefs.trainingDaysPerWeek);
       }
       if ('equipmentIds' in preferences && preferences.equipmentIds !== undefined) {
         mappedPrefs.equipmentIds = preferences.equipmentIds as string[];
+        console.log('[useUserStore] Mapped equipmentIds:', mappedPrefs.equipmentIds);
       }
       if ('equipment' in preferences && preferences.equipment !== undefined) {
         mappedPrefs.equipmentIds = preferences.equipment as string[];
+        console.log('[useUserStore] Mapped equipment -> equipmentIds:', mappedPrefs.equipmentIds);
       }
       
       // Direct TrainingPreferences fields
@@ -153,8 +169,15 @@ export const useUserStore = create<UserState>((set) => ({
       const mergedPreferences: TrainingPreferences = {
         ...state.preferences,
         ...mappedPrefs,
-        ...preferences as Partial<TrainingPreferences>,
       };
+
+      console.log('[useUserStore] Final merged preferences:', {
+        goal: mergedPreferences.goal,
+        experienceLevel: mergedPreferences.experienceLevel,
+        trainingDaysPerWeek: mergedPreferences.trainingDaysPerWeek,
+        equipmentIds: mergedPreferences.equipmentIds,
+        timeAvailability: mergedPreferences.timeAvailability,
+      });
 
       return {
         preferences: mergedPreferences,
@@ -194,8 +217,16 @@ export const useUserStore = create<UserState>((set) => ({
         : null,
     })),
 
-  setOnboardingCompleted: () => set({ hasCompletedOnboarding: true }),
-  setHasCompletedOnboarding: (completed) => set({ hasCompletedOnboarding: completed }),
+  setOnboardingCompleted: () => {
+    console.log('[useUserStore] setOnboardingCompleted called');
+    set({ hasCompletedOnboarding: true });
+    console.log('[useUserStore] hasCompletedOnboarding set to true');
+  },
+  setHasCompletedOnboarding: (completed) => {
+    console.log('[useUserStore] setHasCompletedOnboarding called with:', completed);
+    set({ hasCompletedOnboarding: completed });
+    console.log('[useUserStore] hasCompletedOnboarding set to:', completed);
+  },
 
   resetOnboarding: () =>
     set({
@@ -245,6 +276,38 @@ export const useUserStore = create<UserState>((set) => ({
     set((state) => ({
       personalRecords: state.personalRecords.filter((pr) => pr.id !== id),
     })),
-}));
+
+  hasProfile: () => {
+    const state = get();
+    const result = (
+      state.hasCompletedOnboarding === true &&
+      !!state.preferences.goal &&
+      !!state.preferences.experienceLevel &&
+      !!state.preferences.trainingDaysPerWeek
+    );
+    console.log('[useUserStore] hasProfile() check:', {
+      result,
+      hasCompletedOnboarding: state.hasCompletedOnboarding,
+      hasGoal: !!state.preferences.goal,
+      goal: state.preferences.goal,
+      hasExperienceLevel: !!state.preferences.experienceLevel,
+      experienceLevel: state.preferences.experienceLevel,
+      hasTrainingDaysPerWeek: !!state.preferences.trainingDaysPerWeek,
+      trainingDaysPerWeek: state.preferences.trainingDaysPerWeek,
+    });
+    return result;
+  },
+    }),
+    {
+      name: 'project-athlete-user-store',
+      storage: createJSONStorage(() => AsyncStorage),
+      onRehydrateStorage: () => (state) => {
+        if (state?.setHasHydrated) {
+          state.setHasHydrated(true);
+        }
+      },
+    }
+  )
+);
 
 export default useUserStore;

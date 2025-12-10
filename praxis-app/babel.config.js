@@ -16,10 +16,12 @@ module.exports = function (api) {
             '@engine': './src/engine',
             '@utils': './src/utils',
             '@screens': './src/screens',
+            '@constants': './src/constants',
             '@app': './app',
           },
         },
       ],
+      'react-native-reanimated/plugin',
     ],
   };
 };

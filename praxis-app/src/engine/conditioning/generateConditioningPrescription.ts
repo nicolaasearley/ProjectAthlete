@@ -1,4 +1,4 @@
-import type { TrainingGoal, ExperienceLevel } from '../../core/types';
+import type { TrainingGoal, ExperienceLevel } from '@core/types';
 
 /**
  * Conditioning Block interface for prescription generation

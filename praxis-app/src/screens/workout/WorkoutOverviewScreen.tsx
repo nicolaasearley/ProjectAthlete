@@ -3,10 +3,17 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { Card, PraxisButton, Spacer, IconButton, Chip } from '../../components';
-import { usePlanStore } from '../../../core/store';
-import { useSessionStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { PraxisButton, Spacer, IconButton, Chip } from '@components';
+import { ExpandableBlock } from '@components/blocks/ExpandableBlock';
+import { StrengthBlockRenderer } from '@components/blocks/renderers/StrengthBlockRenderer';
+import { AccessoryBlockRenderer } from '@components/blocks/renderers/AccessoryBlockRenderer';
+import { ConditioningBlockRenderer } from '@components/blocks/renderers/ConditioningBlockRenderer';
+import { WarmupBlockRenderer } from '@components/blocks/renderers/WarmupBlockRenderer';
+import { CooldownBlockRenderer } from '@components/blocks/renderers/CooldownBlockRenderer';
+import { HyroxRaceBlock } from '@components/workout/HyroxRaceBlock';
+import { usePlanStore } from '@core/store';
+import { useSessionStore } from '@core/store';
 import dayjs from 'dayjs';
 
 /**
@@ -25,14 +32,45 @@ export default function WorkoutOverviewScreen() {
     : params.planDayId;
   const { plan } = usePlanStore();
   const { startSession } = useSessionStore();
+  const reorderAccessoryExercises = usePlanStore((s) => s.reorderAccessoryExercises);
+  const updateStrengthSet = usePlanStore((s) => s.updateStrengthSet);
+  const addStrengthSet = usePlanStore((s) => s.addStrengthSet);
+  const removeStrengthSet = usePlanStore((s) => s.removeStrengthSet);
 
   // Find the plan day by ID
-  const today =
-    planDayId !== undefined ? plan.find((day) => day.id === planDayId) : null;
+  const planDay = plan.find((day) => day.id === planDayId) ?? plan[0];
+
+  const orderedBlocks = [...(planDay?.blocks ?? [])].sort((a: any, b: any) => {
+    const order: Record<string, number> = {
+      warmup: 0,
+      strength: 1,
+      accessory: 2,
+      conditioning: 3,
+      cooldown: 4,
+    };
+    return (order[a.type] ?? 99) - (order[b.type] ?? 99);
+  });
+
+  const renderBlockContent = (block: any) => {
+    switch (block.type) {
+      case 'warmup':
+        return <WarmupBlockRenderer block={block} />;
+      case 'strength':
+        return <StrengthBlockRenderer block={block} />;
+      case 'accessory':
+        return <AccessoryBlockRenderer block={block} />;
+      case 'conditioning':
+        return <ConditioningBlockRenderer block={block} />;
+      case 'cooldown':
+        return <CooldownBlockRenderer block={block} />;
+      default:
+        return null;
+    }
+  };
 
   // Handle "Begin Workout" button press
   const handleBeginWorkout = () => {
-    if (!today || !planDayId) return;
+    if (!planDay || !planDayId) return;
 
     // Start the session
     startSession(planDayId);
@@ -43,14 +81,14 @@ export default function WorkoutOverviewScreen() {
 
   // Handle back navigation
   const handleBack = () => {
-    router.replace('/home');
+    router.replace('/today');
   };
 
   // Error state: Workout not found
-  if (planDayId && !today) {
+  if (planDayId && !planDay) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        style={[styles.container, { backgroundColor: theme.colors.appBg }]}
         edges={['top', 'bottom']}
       >
         <View
@@ -65,7 +103,7 @@ export default function WorkoutOverviewScreen() {
             style={[
               styles.errorTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.md,
@@ -85,10 +123,10 @@ export default function WorkoutOverviewScreen() {
   }
 
   // Rest day state: No blocks
-  if (today && today.blocks.length === 0) {
+  if (planDay && planDay.blocks.length === 0) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        style={[styles.container, { backgroundColor: theme.colors.appBg }]}
         edges={['top']}
       >
         <View
@@ -98,7 +136,7 @@ export default function WorkoutOverviewScreen() {
               paddingHorizontal: theme.spacing.lg,
               paddingVertical: theme.spacing.md,
               borderBottomWidth: 1,
-              borderBottomColor: theme.colors.steel,
+              borderBottomColor: theme.colors.surface3,
             },
           ]}
         >
@@ -119,13 +157,13 @@ export default function WorkoutOverviewScreen() {
               style={[
                 styles.headerTitle,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.heading,
                   fontSize: theme.typography.sizes.h2,
                 },
               ]}
             >
-              {formatDate(today.date)}
+              Today&apos;s Workout
             </Text>
           </View>
           <View style={{ width: 44 }} />
@@ -143,7 +181,7 @@ export default function WorkoutOverviewScreen() {
             style={[
               styles.restDayTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h1,
                 marginBottom: theme.spacing.md,
@@ -158,10 +196,10 @@ export default function WorkoutOverviewScreen() {
   }
 
   // Normal workout state
-  if (!today) {
+  if (!planDay) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        style={[styles.container, { backgroundColor: theme.colors.appBg }]}
         edges={['top', 'bottom']}
       >
         <View
@@ -176,7 +214,7 @@ export default function WorkoutOverviewScreen() {
             style={[
               styles.errorTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.md,
@@ -197,7 +235,7 @@ export default function WorkoutOverviewScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.black }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -208,13 +246,13 @@ export default function WorkoutOverviewScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
         <IconButton
           icon={
-            <Ionicons name="arrow-back" size={24} color={theme.colors.white} />
+            <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
           }
           onPress={handleBack}
           variant="ghost"
@@ -225,42 +263,26 @@ export default function WorkoutOverviewScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.xs,
               },
             ]}
           >
-            {formatDate(today.date)}
+            Today&apos;s Workout
           </Text>
-          {/* Focus Tags */}
-          {today.focusTags.length > 0 && (
-            <View style={styles.focusTagsContainer}>
-              {today.focusTags.map((tag, index) => (
-                <Chip
-                  key={index}
-                  label={tag}
-                  variant="accent"
-                  size="small"
-                  style={{ marginRight: theme.spacing.xs }}
-                />
-              ))}
-            </View>
-          )}
-          {/* Duration */}
           <Text
             style={[
-              styles.duration,
+              styles.subtitle,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
-                fontSize: theme.typography.sizes.bodySmall,
-                marginTop: theme.spacing.xs,
+                fontSize: theme.typography.sizes.body,
               },
             ]}
           >
-            {today.estimatedDurationMinutes} min
+            {planDay?.date} • {planDay?.estimatedDurationMinutes} min
           </Text>
         </View>
         <View style={{ width: 44 }} />
@@ -274,176 +296,59 @@ export default function WorkoutOverviewScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Render each block */}
-        {today.blocks.map((block, blockIndex) => (
-          <React.Fragment key={block.id}>
-            <Card
-              variant="elevated"
-              padding="lg"
-              style={{
-                backgroundColor: theme.colors.graphite,
-                borderRadius: theme.radius.lg,
-              }}
+        <Spacer size="lg" />
+
+        {orderedBlocks.map((block: any, index: number) => {
+          // HYROX RACE SIMULATION RENDERER
+          if (
+            block.type === 'conditioning' &&
+            block.conditioning &&
+            'stations' in block.conditioning &&
+            Array.isArray(block.conditioning.stations)
+          ) {
+            return (
+              <React.Fragment key={block.id ?? `${block.type}-${index}`}>
+                <HyroxRaceBlock race={block.conditioning as any} />
+                {index < orderedBlocks.length - 1 && <Spacer size="lg" />}
+              </React.Fragment>
+            );
+          }
+
+          return (
+            <ExpandableBlock
+              key={block.id ?? `${block.type}-${index}`}
+              title={block.title ?? ''}
+              subtitle={
+                block.type === 'strength'
+                  ? 'Main lift + key accessory work'
+                  : undefined
+              }
+              type={block.type}
+              durationMinutes={block.estimatedDurationMinutes}
+              defaultExpanded={index === 0}
             >
-              <Text
-                style={[
-                  styles.blockTitle,
-                  {
-                    color: theme.colors.white,
-                    fontFamily: theme.typography.fonts.headingMedium,
-                    fontSize: theme.typography.sizes.h3,
-                    marginBottom: theme.spacing.md,
-                  },
-                ]}
-              >
-                {block.title}
-              </Text>
-
-              {/* Block type-specific content */}
-              {block.type === 'strength' && block.strengthMain && (
-                <View>
-                  {block.strengthMain.sets.length > 0 && (
-                    <Text
-                      style={[
-                        styles.blockDescription,
-                        {
-                          color: theme.colors.white,
-                          fontFamily: theme.typography.fonts.body,
-                          fontSize: theme.typography.sizes.body,
-                        },
-                      ]}
-                    >
-                      {block.strengthMain.sets.length} ×{' '}
-                      {block.strengthMain.sets[0]?.targetReps || '?'} ×{' '}
-                      {block.strengthMain.sets[0]?.targetPercent1RM
-                        ? `${Math.round(
-                            (block.strengthMain.sets[0].targetPercent1RM || 0) *
-                              100
-                          )}%`
-                        : 'RPE ' +
-                          (block.strengthMain.sets[0]?.targetRpe || '?')}
-                    </Text>
-                  )}
-                </View>
-              )}
-
-              {block.type === 'accessory' && block.accessory && (
-                <View>
-                  {block.accessory.map((exercise, index) => (
-                    <Text
-                      key={index}
-                      style={[
-                        styles.blockDescription,
-                        {
-                          color: theme.colors.white,
-                          fontFamily: theme.typography.fonts.body,
-                          fontSize: theme.typography.sizes.bodySmall,
-                          marginBottom:
-                            index < block.accessory!.length - 1
-                              ? theme.spacing.sm
-                              : 0,
-                        },
-                      ]}
-                    >
-                      • {exercise.exerciseId} — {exercise.sets.length} ×{' '}
-                      {exercise.sets[0]?.targetReps || '?'}
-                    </Text>
-                  ))}
-                </View>
-              )}
-
-              {block.type === 'conditioning' && block.conditioning && (
-                <Text
-                  style={[
-                    styles.blockDescription,
-                    {
-                      color: theme.colors.white,
-                      fontFamily: theme.typography.fonts.body,
-                      fontSize: theme.typography.sizes.body,
-                    },
-                  ]}
-                >
-                  {block.conditioning.rounds || '?'} rounds —{' '}
-                  {block.conditioning.workSeconds
-                    ? `${Math.round(block.conditioning.workSeconds / 60)}s`
-                    : '?'}{' '}
-                  on /{' '}
-                  {block.conditioning.restSeconds
-                    ? `${Math.round(block.conditioning.restSeconds / 60)}s`
-                    : '?'}{' '}
-                  off @ {block.conditioning.targetZone || 'Z?'}
-                </Text>
-              )}
-
-              {block.type === 'warmup' && block.warmupItems && (
-                <View>
-                  {block.warmupItems.map((item, index) => (
-                    <Text
-                      key={index}
-                      style={[
-                        styles.blockDescription,
-                        {
-                          color: theme.colors.white,
-                          fontFamily: theme.typography.fonts.body,
-                          fontSize: theme.typography.sizes.bodySmall,
-                          marginBottom:
-                            index < block.warmupItems!.length - 1
-                              ? theme.spacing.sm
-                              : 0,
-                        },
-                      ]}
-                    >
-                      • {item}
-                    </Text>
-                  ))}
-                </View>
-              )}
-
-              {block.type === 'cooldown' && block.cooldownItems && (
-                <View>
-                  {block.cooldownItems.map((item, index) => (
-                    <Text
-                      key={index}
-                      style={[
-                        styles.blockDescription,
-                        {
-                          color: theme.colors.white,
-                          fontFamily: theme.typography.fonts.body,
-                          fontSize: theme.typography.sizes.bodySmall,
-                          marginBottom:
-                            index < block.cooldownItems!.length - 1
-                              ? theme.spacing.sm
-                              : 0,
-                        },
-                      ]}
-                    >
-                      • {item}
-                    </Text>
-                  ))}
-                </View>
-              )}
-            </Card>
-            {blockIndex < today.blocks.length - 1 && <Spacer size="lg" />}
-          </React.Fragment>
-        ))}
+              {renderBlockContent(block)}
+            </ExpandableBlock>
+          );
+        })}
 
         <Spacer size="xl" />
       </ScrollView>
 
       {/* Primary CTA */}
-      {today.blocks.length > 0 && (
+      {planDay && planDay.blocks.length > 0 && (
         <View
           style={[
             styles.footer,
             {
               padding: theme.spacing.lg,
               borderTopWidth: 1,
-              borderTopColor: theme.colors.steel,
+              borderTopColor: theme.colors.surface3,
             },
           ]}
         >
           <PraxisButton
-            title="Begin Workout"
+            title="Start Session"
             onPress={handleBeginWorkout}
             size="large"
           />
@@ -502,6 +407,9 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontWeight: '700',
     textAlign: 'center',
+  },
+  subtitle: {
+    fontWeight: '400',
   },
   restDayContainer: {
     flex: 1,

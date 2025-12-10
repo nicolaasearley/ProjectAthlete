@@ -103,7 +103,7 @@ export default function UnitsSettingsScreen() {
           {
             paddingVertical: theme.spacing.lg,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
             borderLeftWidth: isSelected ? 3 : 0,
             borderLeftColor: isSelected
               ? theme.colors.acidGreen
@@ -115,7 +115,7 @@ export default function UnitsSettingsScreen() {
           style={[
             styles.rowLabel,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.body,
               fontSize: theme.typography.sizes.body,
             },
@@ -150,7 +150,7 @@ export default function UnitsSettingsScreen() {
                   width: 8,
                   height: 8,
                   borderRadius: 4,
-                  backgroundColor: theme.colors.black,
+                  backgroundColor: theme.colors.appBg,
                 },
               ]}
             />
@@ -162,7 +162,7 @@ export default function UnitsSettingsScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -173,7 +173,7 @@ export default function UnitsSettingsScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -190,7 +190,7 @@ export default function UnitsSettingsScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -220,7 +220,7 @@ export default function UnitsSettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -252,7 +252,7 @@ export default function UnitsSettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -284,7 +284,7 @@ export default function UnitsSettingsScreen() {
           {
             padding: theme.spacing.lg,
             borderTopWidth: 1,
-            borderTopColor: theme.colors.steel,
+            borderTopColor: theme.colors.surface3,
           },
         ]}
       >

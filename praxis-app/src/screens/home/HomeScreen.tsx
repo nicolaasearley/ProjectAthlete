@@ -2,15 +2,36 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useTheme } from '../../theme';
-import { Card, PraxisButton, Spacer, Chip } from '../../components';
-import { usePlanStore } from '../../core/store';
+import { useTheme } from '@theme';
+import { Card, PraxisButton, Spacer, Chip } from '@components';
+import { usePlanStore } from '@core/store';
 
 export default function HomeScreen() {
   const theme = useTheme();
-  const { plan, getTodayPlan } = usePlanStore();
+  const { plan, getTodayPlan, _hasHydrated } = usePlanStore();
 
-  const todayWorkout = getTodayPlan();
+  // Wait for hydration before rendering plan state
+  if (!_hasHydrated) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.appBg }]}
+        edges={['top']}
+      >
+        <View style={{ padding: theme.spacing.lg }}>
+          <Text
+            style={{
+              color: theme.colors.textMuted,
+              fontFamily: theme.typography.fonts.body,
+            }}
+          >
+            Loading...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const todayWorkout = _hasHydrated ? getTodayPlan() : null;
 
   // Handle navigation to WorkoutOverview
   const handleOpenWorkout = () => {
@@ -42,7 +63,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       <ScrollView
@@ -58,7 +79,7 @@ export default function HomeScreen() {
           style={[
             styles.title,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.heading,
               fontSize: theme.typography.sizes.h1,
               marginBottom: theme.spacing.xl,
@@ -69,13 +90,13 @@ export default function HomeScreen() {
         </Text>
 
         {/* State 1: No Plan */}
-        {plan.length === 0 ? (
+        {_hasHydrated && plan.length === 0 ? (
           <Card variant="elevated" padding="lg">
             <Text
               style={[
                 styles.emptyTitle,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.headingMedium,
                   fontSize: theme.typography.sizes.h3,
                   marginBottom: theme.spacing.md,
@@ -88,7 +109,7 @@ export default function HomeScreen() {
               style={[
                 styles.emptyText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom: theme.spacing.lg,
@@ -110,7 +131,7 @@ export default function HomeScreen() {
               style={[
                 styles.restDayTitle,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.heading,
                   fontSize: theme.typography.sizes.h1,
                   marginBottom: theme.spacing.md,
@@ -123,7 +144,7 @@ export default function HomeScreen() {
               style={[
                 styles.restDaySubtitle,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom: theme.spacing.xl,
@@ -154,7 +175,7 @@ export default function HomeScreen() {
                 style={[
                   styles.cardTitle,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.headingMedium,
                     fontSize: theme.typography.sizes.h3,
                     marginBottom: theme.spacing.md,
@@ -184,7 +205,7 @@ export default function HomeScreen() {
                 style={[
                   styles.duration,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                     marginTop: theme.spacing.md,
@@ -203,7 +224,7 @@ export default function HomeScreen() {
                     style={[
                       styles.blockItem,
                       {
-                        color: theme.colors.white,
+                        color: theme.colors.textPrimary,
                         fontFamily: theme.typography.fonts.body,
                         fontSize: theme.typography.sizes.bodySmall,
                       },
@@ -230,7 +251,7 @@ export default function HomeScreen() {
               style={[
                 styles.emptyText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom: theme.spacing.lg,

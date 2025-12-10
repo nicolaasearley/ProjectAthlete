@@ -54,13 +54,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     plugins: [
       'expo-router',
       'expo-updates',
-      [
-        'sentry-expo',
-        {
-          organization: 'praxis',
-          project: 'praxis-app',
-        },
-      ],
     ],
     experiments: {
       typedRoutes: true,
@@ -71,7 +64,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       env: process.env.EXPO_APP_ENV || 'development',
       apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || '',
-      sentryDsn: process.env.EXPO_PUBLIC_SENTRY_DSN || '',
       analyticsKey: process.env.EXPO_PUBLIC_ANALYTICS_KEY || '',
     },
   };

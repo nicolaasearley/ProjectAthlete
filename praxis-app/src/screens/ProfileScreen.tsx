@@ -1,12 +1,12 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../../theme';
+import { useTheme } from '@theme';
 
 export default function ProfileScreen() {
   const theme = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.carbon }]}>
-      <Text style={[styles.title, { color: theme.colors.white }]}>Profile</Text>
+    <View style={[styles.container, { backgroundColor: theme.colors.appBg }]}>
+      <Text style={[styles.title, { color: theme.colors.textPrimary }]}>Profile</Text>
     </View>
   );
 }

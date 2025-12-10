@@ -10,9 +10,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { PraxisButton, IconButton } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { PraxisButton, IconButton } from '@components';
+import { useUserStore } from '@core/store';
 
 type MainStackParamList = {
   Settings: undefined;
@@ -73,7 +73,7 @@ export default function EquipmentSettingsScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -84,7 +84,7 @@ export default function EquipmentSettingsScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -101,7 +101,7 @@ export default function EquipmentSettingsScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -132,7 +132,7 @@ export default function EquipmentSettingsScreen() {
               style={[
                 styles.equipmentRow,
                 {
-                  backgroundColor: theme.colors.graphite,
+                  backgroundColor: theme.colors.surface2,
                   borderRadius: theme.radius.md,
                   paddingVertical: theme.spacing.xxl,
                   paddingHorizontal: theme.spacing.lg,
@@ -140,7 +140,7 @@ export default function EquipmentSettingsScreen() {
                   borderWidth: isSelected ? 2 : 1,
                   borderColor: isSelected
                     ? theme.colors.acidGreen
-                    : theme.colors.steel,
+                    : theme.colors.surface3,
                 },
               ]}
             >
@@ -148,7 +148,7 @@ export default function EquipmentSettingsScreen() {
                 style={[
                   styles.equipmentName,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -181,7 +181,7 @@ export default function EquipmentSettingsScreen() {
           {
             padding: theme.spacing.lg,
             borderTopWidth: 1,
-            borderTopColor: theme.colors.steel,
+            borderTopColor: theme.colors.surface3,
           },
         ]}
       >

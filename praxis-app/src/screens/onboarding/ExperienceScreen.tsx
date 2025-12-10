@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useTheme } from '../../../theme';
-import { PraxisButton } from '../../components';
-import { useUserStore } from '../../../core/store';
-import type { ExperienceLevel } from '../../../core/types';
+import { useTheme } from '@theme';
+import { PraxisButton } from '@components';
+import { useUserStore } from '@core/store';
+import type { ExperienceLevel } from '@core/types';
 
 const experienceOptions: { label: string; value: ExperienceLevel }[] = [
   { label: 'Beginner', value: 'beginner' },
@@ -32,7 +32,7 @@ export default function ExperienceScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top', 'bottom']}
     >
       <View
@@ -48,7 +48,7 @@ export default function ExperienceScreen() {
           style={[
             styles.title,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.heading,
               fontSize: theme.typography.sizes.h2,
               marginBottom: theme.spacing.xxxl,
@@ -73,11 +73,11 @@ export default function ExperienceScreen() {
                     {
                       backgroundColor: isSelected
                         ? theme.colors.acidGreen
-                        : theme.colors.graphite,
+                        : theme.colors.surface2,
                       borderWidth: isSelected ? 0 : 1,
                       borderColor: isSelected
                         ? theme.colors.transparent
-                        : theme.colors.steel,
+                        : theme.colors.surface3,
                       borderRadius: theme.radius.md,
                       paddingVertical: theme.spacing.xl,
                       paddingHorizontal: theme.spacing.xl,

@@ -11,10 +11,20 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import { useTheme } from '../../../theme';
-import { PraxisButton, Card, Spacer, Chip } from '../../components';
-import { usePlanStore } from '../../../core/store';
-import type { WorkoutPlanDay } from '../../../core/types';
+import { useTheme } from '@theme';
+import { PraxisButton, Card, Spacer, Chip } from '@components';
+import { ReadinessMiniGraph } from '@components/ReadinessMiniGraph';
+import { usePlanStore } from '@core/store';
+import { useUserStore } from '@core/store/useUserStore';
+import type { WorkoutPlanDay } from '@core/types';
+import { workoutIcons } from '@constants/workoutIcons';
+import { getIntensityColor } from '@utils/getIntensityColor';
+import {
+  calculateWeeklyStrengthVolume,
+  calculateWeeklyEngineTime,
+  calculateHybridScore,
+  determineBestTrainingDay,
+} from '@utils/trainingMetrics';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -42,10 +52,12 @@ export default function CalendarScreen() {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const { plan } = usePlanStore();
+  const { readinessHistory } = useUserStore();
 
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
   const today = dayjs();
   const todayKey = today.format('YYYY-MM-DD');
@@ -155,6 +167,20 @@ export default function CalendarScreen() {
     return today.format('MMMM YYYY');
   };
 
+  // Get current week's plan days for summary
+  const currentWeek = useMemo(() => {
+    const weekDays: WorkoutPlanDay[] = [];
+    for (let i = 0; i < 7; i++) {
+      const date = currentWeekStart.add(i, 'day');
+      const dateKey = date.format('YYYY-MM-DD');
+      const planDay = planByDate.get(dateKey);
+      if (planDay) {
+        weekDays.push(planDay);
+      }
+    }
+    return weekDays;
+  }, [currentWeekStart, planByDate]);
+
   const handleDayPress = (date: string) => {
     setSelectedDate(date);
     setIsDrawerVisible(true);
@@ -183,15 +209,15 @@ export default function CalendarScreen() {
       case 'todayPlanned':
         return theme.colors.acidGreen;
       case 'upcoming':
-        return theme.colors.graphite;
+        return theme.colors.surface2;
       case 'pastPlanned':
-        return theme.colors.steel;
+        return theme.colors.surface3;
       case 'rest':
         return 'transparent';
       case 'none':
         return 'transparent';
       default:
-        return theme.colors.graphite;
+        return theme.colors.surface2;
     }
   };
 
@@ -200,7 +226,7 @@ export default function CalendarScreen() {
       return theme.colors.acidGreen;
     }
     if (status === 'rest') {
-      return theme.colors.steel;
+      return theme.colors.surface3;
     }
     return 'transparent';
   };
@@ -213,45 +239,131 @@ export default function CalendarScreen() {
     );
   };
 
+  /**
+   * Render a day cell with icon and intensity ring
+   */
+  const renderDay = (
+    date: string,
+    onSelect: (date: string) => void
+  ): React.ReactElement => {
+    const planDay = planByDate.get(date);
+    const isRest = !planDay?.blocks || planDay.blocks.length === 0;
+    const isHyrox =
+      planDay?.blocks?.some(
+        (b) =>
+          b.type === 'conditioning' &&
+          b.conditioning &&
+          'stations' in b.conditioning &&
+          Array.isArray(b.conditioning.stations)
+      ) ?? false;
+    const duration = planDay?.estimatedDurationMinutes ?? 0;
+
+    const primaryTag = isRest
+      ? 'rest'
+      : isHyrox
+        ? 'hyrox'
+        : planDay?.focusTags?.[0] ?? 'mixed';
+
+    const icon = workoutIcons[primaryTag as keyof typeof workoutIcons] ?? '🏋️';
+    const ringColor = getIntensityColor(duration);
+    const isSelected = selectedDate === date;
+
+    return (
+      <TouchableOpacity
+        onPress={() => onSelect(date)}
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: 6,
+        }}
+      >
+        {/* Intensity ring */}
+        <View
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            borderWidth: 2,
+            borderColor: ringColor,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: isSelected
+              ? theme.colors.primaryDim
+              : theme.colors.surface2,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 22,
+              textAlign: 'center',
+            }}
+          >
+            {icon}
+          </Text>
+        </View>
+
+        {/* Date label */}
+        <Text
+          style={{
+            marginTop: 4,
+            fontSize: 12,
+            color: theme.colors.textSecondary,
+          }}
+        >
+          {date.slice(-2)}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
   const renderWeeklyView = () => {
     const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     return (
       <View style={[styles.weeklyContainer, { padding: theme.spacing.xxl }]}>
-        <Text
-          style={[
-            styles.weekRange,
-            {
-              color: theme.colors.muted,
-              fontFamily: theme.typography.fonts.body,
-              fontSize: theme.typography.sizes.bodySmall,
-              marginBottom: theme.spacing.lg,
-            },
-          ]}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: theme.spacing.lg,
+          }}
         >
-          Week of {getWeekRange()}
-        </Text>
+          <Text
+            style={[
+              styles.weekRange,
+              {
+                color: theme.colors.textMuted,
+                fontFamily: theme.typography.fonts.body,
+                fontSize: theme.typography.sizes.bodySmall,
+              },
+            ]}
+          >
+            Week of {getWeekRange()}
+          </Text>
+          <TouchableOpacity onPress={() => setIsSummaryOpen(true)}>
+            <Text
+              style={{
+                color: theme.colors.primaryLight,
+                fontSize: 14,
+                fontFamily: theme.typography.fonts.bodyMedium,
+              }}
+            >
+              View Week Summary
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.weeklyGrid}>
           {dayLabels.map((label, index) => {
             const dayData = weeklyData[index];
-            const isToday = dayjs(dayData.date).isSame(today, 'day');
-            const dotColor = getDotColor(dayData.status, isToday);
-            const borderColor = getDotBorderColor(dayData.status, isToday);
-            const isFilled = getDotFill(dayData.status);
-
             return (
-              <TouchableOpacity
-                key={index}
-                style={styles.weeklyDay}
-                onPress={() => handleDayPress(dayData.date)}
-                activeOpacity={0.7}
-              >
+              <View key={index} style={styles.weeklyDay}>
                 <Text
                   style={[
                     styles.dayLabel,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.bodySmall,
                       marginBottom: theme.spacing.sm,
@@ -260,20 +372,8 @@ export default function CalendarScreen() {
                 >
                   {label}
                 </Text>
-                <View
-                  style={[
-                    styles.weeklyDot,
-                    {
-                      backgroundColor: isFilled ? dotColor : 'transparent',
-                      width: 32,
-                      height: 32,
-                      borderRadius: 16,
-                      borderWidth: borderColor !== 'transparent' ? 2 : 0,
-                      borderColor: borderColor,
-                    },
-                  ]}
-                />
-              </TouchableOpacity>
+                {renderDay(dayData.date, handleDayPress)}
+              </View>
             );
           })}
         </View>
@@ -301,7 +401,7 @@ export default function CalendarScreen() {
           style={[
             styles.monthTitle,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.headingMedium,
               fontSize: theme.typography.sizes.h2,
               marginBottom: theme.spacing.lg,
@@ -320,7 +420,7 @@ export default function CalendarScreen() {
                 style={[
                   styles.monthlyHeaderLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.bodySmall,
                   },
@@ -338,55 +438,32 @@ export default function CalendarScreen() {
             style={[styles.monthlyRow, { marginBottom: theme.spacing.md }]}
           >
             {week.map((dayData, dayIndex) => {
-              const isToday = dayjs(dayData.date).isSame(today, 'day');
-              const dotColor = getDotColor(dayData.status, isToday);
-              const borderColor = getDotBorderColor(dayData.status, isToday);
-              const isFilled = getDotFill(dayData.status);
               const isCurrentMonth =
                 dayjs(dayData.date).month() === today.month();
-              const dayNumber = dayjs(dayData.date).date();
 
               return (
-                <TouchableOpacity
-                  key={dayIndex}
-                  style={styles.monthlyCell}
-                  onPress={() => handleDayPress(dayData.date)}
-                  activeOpacity={0.7}
-                >
-                  {isCurrentMonth && (
-                    <Text
-                      style={[
-                        styles.monthlyDayNumber,
-                        {
-                          color: theme.colors.muted,
-                          fontFamily: theme.typography.fonts.body,
-                          fontSize: theme.typography.sizes.bodySmall,
-                          marginBottom: 4,
-                        },
-                      ]}
+                <View key={dayIndex} style={styles.monthlyCell}>
+                  {isCurrentMonth ? (
+                    renderDay(dayData.date, handleDayPress)
+                  ) : (
+                    <View
+                      style={{
+                        opacity: 0.3,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
                     >
-                      {dayNumber}
-                    </Text>
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          color: theme.colors.textMuted,
+                        }}
+                      >
+                        {dayjs(dayData.date).date()}
+                      </Text>
+                    </View>
                   )}
-                  <View
-                    style={[
-                      styles.monthlyDot,
-                      {
-                        backgroundColor:
-                          isFilled && isCurrentMonth ? dotColor : 'transparent',
-                        width: isCurrentMonth ? 20 : 16,
-                        height: isCurrentMonth ? 20 : 16,
-                        borderRadius: isCurrentMonth ? 10 : 8,
-                        borderWidth:
-                          borderColor !== 'transparent' && isCurrentMonth
-                            ? 2
-                            : 0,
-                        borderColor: borderColor,
-                        opacity: isCurrentMonth ? 1 : 0.3,
-                      },
-                    ]}
-                  />
-                </TouchableOpacity>
+                </View>
               );
             })}
           </View>
@@ -417,7 +494,7 @@ export default function CalendarScreen() {
             style={[
               styles.drawerContent,
               {
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderTopLeftRadius: theme.radius.xl,
                 borderTopRightRadius: theme.radius.xl,
                 padding: theme.spacing.lg,
@@ -431,7 +508,7 @@ export default function CalendarScreen() {
               style={[
                 styles.drawerHandle,
                 {
-                  backgroundColor: theme.colors.steel,
+                  backgroundColor: theme.colors.surface3,
                   width: 40,
                   height: 4,
                   borderRadius: theme.radius.pill,
@@ -445,7 +522,7 @@ export default function CalendarScreen() {
               style={[
                 styles.drawerDate,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.headingMedium,
                   fontSize: theme.typography.sizes.h3,
                   marginBottom: theme.spacing.sm,
@@ -482,7 +559,7 @@ export default function CalendarScreen() {
                   style={[
                     styles.drawerSession,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.body,
                       marginBottom: theme.spacing.lg,
@@ -499,7 +576,7 @@ export default function CalendarScreen() {
                       style={[
                         styles.sectionTitle,
                         {
-                          color: theme.colors.white,
+                          color: theme.colors.textPrimary,
                           fontFamily: theme.typography.fonts.headingMedium,
                           fontSize: theme.typography.sizes.body,
                           marginBottom: theme.spacing.md,
@@ -520,7 +597,7 @@ export default function CalendarScreen() {
                           style={[
                             styles.blockItem,
                             {
-                              color: theme.colors.white,
+                              color: theme.colors.textPrimary,
                               fontFamily: theme.typography.fonts.body,
                               fontSize: theme.typography.sizes.bodySmall,
                               marginBottom:
@@ -540,7 +617,7 @@ export default function CalendarScreen() {
                     style={[
                       styles.emptyText,
                       {
-                        color: theme.colors.muted,
+                        color: theme.colors.textMuted,
                         fontFamily: theme.typography.fonts.body,
                         fontSize: theme.typography.sizes.body,
                         marginBottom: theme.spacing.lg,
@@ -566,7 +643,7 @@ export default function CalendarScreen() {
                   style={[
                     styles.emptyText,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.body,
                       marginBottom: theme.spacing.lg,
@@ -587,7 +664,7 @@ export default function CalendarScreen() {
   if (plan.length === 0) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        style={[styles.container, { backgroundColor: theme.colors.appBg }]}
         edges={['top', 'bottom']}
       >
         <View
@@ -597,7 +674,7 @@ export default function CalendarScreen() {
               paddingHorizontal: theme.spacing.lg,
               paddingVertical: theme.spacing.md,
               borderBottomWidth: 1,
-              borderBottomColor: theme.colors.steel,
+              borderBottomColor: theme.colors.surface3,
             },
           ]}
         >
@@ -606,7 +683,7 @@ export default function CalendarScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingLarge,
                 fontSize: theme.typography.sizes.h1,
               },
@@ -629,7 +706,7 @@ export default function CalendarScreen() {
             style={[
               styles.emptyTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.md,
@@ -650,7 +727,7 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -661,7 +738,7 @@ export default function CalendarScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -670,7 +747,7 @@ export default function CalendarScreen() {
           style={[
             styles.headerTitle,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.headingLarge,
               fontSize: theme.typography.sizes.h1,
             },
@@ -706,6 +783,124 @@ export default function CalendarScreen() {
 
       {/* Daily Summary Drawer */}
       {renderDailySummaryDrawer()}
+
+      {/* Weekly Summary Panel */}
+      {isSummaryOpen && (
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: theme.colors.surface3,
+            padding: theme.spacing.lg,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            borderWidth: 1,
+            borderColor: theme.colors.surface2,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '600',
+              color: theme.colors.textPrimary,
+              fontFamily: theme.typography.fonts.headingMedium,
+              marginBottom: theme.spacing.md,
+            }}
+          >
+            Weekly Summary
+          </Text>
+
+          {/* Compute metrics */}
+          {(() => {
+            const strengthVolume = calculateWeeklyStrengthVolume(currentWeek);
+            const engineTime = calculateWeeklyEngineTime(currentWeek);
+            const hybridScore = calculateHybridScore(strengthVolume, engineTime);
+            const bestDay = determineBestTrainingDay(currentWeek);
+            const readinessValues = readinessHistory
+              .slice(-7)
+              .map((r) => r.readinessScore ?? 50);
+
+            return (
+              <>
+                <Text
+                  style={{
+                    color: theme.colors.textSecondary,
+                    fontFamily: theme.typography.fonts.body,
+                    marginBottom: 8,
+                  }}
+                >
+                  Strength Volume: {strengthVolume} pts
+                </Text>
+                <Text
+                  style={{
+                    color: theme.colors.textSecondary,
+                    fontFamily: theme.typography.fonts.body,
+                    marginBottom: 8,
+                  }}
+                >
+                  Engine Time: {engineTime} min
+                </Text>
+                <Text
+                  style={{
+                    color: theme.colors.textSecondary,
+                    fontFamily: theme.typography.fonts.body,
+                    marginBottom: 8,
+                  }}
+                >
+                  Hybrid Load Score: {hybridScore}
+                </Text>
+
+                <Text
+                  style={{
+                    color: theme.colors.textPrimary,
+                    fontFamily: theme.typography.fonts.headingMedium,
+                    marginTop: 12,
+                    marginBottom: 8,
+                  }}
+                >
+                  Readiness Trend
+                </Text>
+                <ReadinessMiniGraph data={readinessValues} />
+
+                {bestDay && (
+                  <Text
+                    style={{
+                      color: theme.colors.textSecondary,
+                      fontFamily: theme.typography.fonts.body,
+                      marginTop: 12,
+                    }}
+                  >
+                    Best Training Day: {bestDay.date}
+                  </Text>
+                )}
+
+                <TouchableOpacity
+                  onPress={() => setIsSummaryOpen(false)}
+                  style={{
+                    marginTop: theme.spacing.lg,
+                    padding: theme.spacing.md,
+                    backgroundColor: theme.colors.primary,
+                    borderRadius: 16,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: '#000',
+                      textAlign: 'center',
+                      fontFamily: theme.typography.fonts.bodyMedium,
+                      fontWeight: '600',
+                    }}
+                  >
+                    Close
+                  </Text>
+                </TouchableOpacity>
+              </>
+            );
+          })()}
+        </View>
+      )}
     </SafeAreaView>
   );
 }

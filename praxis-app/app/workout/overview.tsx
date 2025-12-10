@@ -1,2 +1,1 @@
-export { default } from '@screens/workout/WorkoutOverviewScreen';
-
+export { default } from '@/screens/workout/WorkoutOverviewScreen';

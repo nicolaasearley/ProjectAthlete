@@ -11,12 +11,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { PraxisButton, IconButton, Spacer } from '../../components';
-import { usePlanStore, useSessionStore } from '../../../core/store';
-import type { WorkoutBlock } from '../../../core/types';
+import { useTheme } from '@theme';
+import { PraxisButton, IconButton, Spacer } from '@components';
+import { usePlanStore, useSessionStore } from '@core/store';
+import type { WorkoutBlock } from '@core/types';
 import dayjs from 'dayjs';
-import { trackEvent, trackScreen } from '../../core/analytics';
+import { trackEvent, trackScreen } from '@core/analytics';
 
 type MainStackParamList = {
   WorkoutSummary: undefined;
@@ -276,7 +276,7 @@ export default function WorkoutSessionScreen() {
           style={[
             styles.setTitle,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.headingMedium,
               fontSize: theme.typography.sizes.h3,
               marginBottom: theme.spacing.xl,
@@ -292,7 +292,7 @@ export default function WorkoutSessionScreen() {
               style={[
                 styles.inputLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.bodyMedium,
                   fontSize: theme.typography.sizes.bodySmall,
                   marginBottom: theme.spacing.sm,
@@ -305,9 +305,9 @@ export default function WorkoutSessionScreen() {
               style={[
                 styles.input,
                 {
-                  backgroundColor: theme.colors.graphite,
-                  borderColor: theme.colors.steel,
-                  color: theme.colors.white,
+                  backgroundColor: theme.colors.surface2,
+                  borderColor: theme.colors.surface3,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   borderRadius: theme.radius.md,
@@ -328,7 +328,7 @@ export default function WorkoutSessionScreen() {
               style={[
                 styles.inputLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.bodyMedium,
                   fontSize: theme.typography.sizes.bodySmall,
                   marginBottom: theme.spacing.sm,
@@ -341,9 +341,9 @@ export default function WorkoutSessionScreen() {
               style={[
                 styles.input,
                 {
-                  backgroundColor: theme.colors.graphite,
-                  borderColor: theme.colors.steel,
-                  color: theme.colors.white,
+                  backgroundColor: theme.colors.surface2,
+                  borderColor: theme.colors.surface3,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   borderRadius: theme.radius.md,
@@ -366,7 +366,7 @@ export default function WorkoutSessionScreen() {
           style={[
             styles.inputLabel,
             {
-              color: theme.colors.muted,
+              color: theme.colors.textMuted,
               fontFamily: theme.typography.fonts.bodyMedium,
               fontSize: theme.typography.sizes.bodySmall,
               marginBottom: theme.spacing.md,
@@ -419,7 +419,7 @@ export default function WorkoutSessionScreen() {
           style={[
             styles.blockTitle,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.headingMedium,
               fontSize: theme.typography.sizes.h3,
               marginBottom: theme.spacing.xl,
@@ -435,7 +435,7 @@ export default function WorkoutSessionScreen() {
             style={[
               styles.accessorySetRow,
               {
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.md,
                 padding: theme.spacing.lg,
                 marginBottom: theme.spacing.md,
@@ -485,7 +485,7 @@ export default function WorkoutSessionScreen() {
           style={[
             styles.roundTitle,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.headingMedium,
               fontSize: theme.typography.sizes.h3,
               marginBottom: theme.spacing.xl,
@@ -501,7 +501,7 @@ export default function WorkoutSessionScreen() {
             {
               backgroundColor: isConditioningWorkPhase
                 ? theme.colors.acidGreen
-                : theme.colors.graphite,
+                : theme.colors.surface2,
               borderRadius: theme.radius.xl,
               padding: theme.spacing.xxxl,
               marginBottom: theme.spacing.xl,
@@ -559,7 +559,7 @@ export default function WorkoutSessionScreen() {
             style={[
               styles.conditioningSubtext,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.body,
                 marginBottom: theme.spacing.lg,
@@ -575,7 +575,7 @@ export default function WorkoutSessionScreen() {
             style={[
               styles.conditioningSubtext,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.body,
                 marginBottom: theme.spacing.lg,
@@ -614,7 +614,7 @@ export default function WorkoutSessionScreen() {
           style={[
             styles.blockTitle,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.headingMedium,
               fontSize: theme.typography.sizes.h3,
               marginBottom: theme.spacing.xl,
@@ -632,7 +632,7 @@ export default function WorkoutSessionScreen() {
               style={[
                 styles.cooldownItem,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom: theme.spacing.md,
@@ -647,7 +647,7 @@ export default function WorkoutSessionScreen() {
             style={[
               styles.cooldownItem,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.body,
                 marginBottom: theme.spacing.xl,
@@ -708,7 +708,7 @@ export default function WorkoutSessionScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.black }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Exercise Header Bar */}
@@ -719,7 +719,7 @@ export default function WorkoutSessionScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -736,7 +736,7 @@ export default function WorkoutSessionScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -749,7 +749,7 @@ export default function WorkoutSessionScreen() {
               style={[
                 styles.headerSubtext,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.bodySmall,
                 },
@@ -782,7 +782,7 @@ export default function WorkoutSessionScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderTopWidth: 1,
-            borderTopColor: theme.colors.steel,
+            borderTopColor: theme.colors.surface3,
           },
         ]}
       >
@@ -814,7 +814,7 @@ export default function WorkoutSessionScreen() {
                   {
                     backgroundColor: isActive
                       ? theme.colors.acidGreen
-                      : theme.colors.graphite,
+                      : theme.colors.surface2,
                     width: 40,
                     height: 40,
                     borderRadius: 20,
@@ -864,7 +864,7 @@ export default function WorkoutSessionScreen() {
             style={[
               styles.modalContent,
               {
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.xl,
                 padding: theme.spacing.xxxl,
               },
@@ -874,7 +874,7 @@ export default function WorkoutSessionScreen() {
               style={[
                 styles.modalTitle,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.heading,
                   fontSize: theme.typography.sizes.h1,
                   marginBottom: theme.spacing.xl,
@@ -918,7 +918,7 @@ export default function WorkoutSessionScreen() {
                 style={[
                   styles.modalSubtext,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                     marginBottom: theme.spacing.xl,

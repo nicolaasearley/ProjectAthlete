@@ -10,14 +10,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { PraxisButton, IconButton, Spacer } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { PraxisButton, IconButton, Spacer } from '@components';
+import { useUserStore } from '@core/store';
 import type {
   TrainingGoal,
   ExperienceLevel,
   TimeAvailability,
-} from '../../../core/types';
+} from '@core/types';
 
 type MainStackParamList = {
   Settings: undefined;
@@ -112,11 +112,11 @@ export default function PreferencesSettingsScreen() {
             {
               backgroundColor: isSelected
                 ? theme.colors.acidGreen
-                : theme.colors.graphite,
+                : theme.colors.surface2,
               borderWidth: isSelected ? 0 : 1,
               borderColor: isSelected
                 ? theme.colors.transparent
-                : theme.colors.steel,
+                : theme.colors.surface3,
               borderRadius: theme.radius.md,
               paddingVertical: theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl,
@@ -154,11 +154,11 @@ export default function PreferencesSettingsScreen() {
             {
               backgroundColor: isSelected
                 ? theme.colors.acidGreen
-                : theme.colors.graphite,
+                : theme.colors.surface2,
               borderWidth: isSelected ? 0 : 1,
               borderColor: isSelected
                 ? theme.colors.transparent
-                : theme.colors.steel,
+                : theme.colors.surface3,
               borderRadius: theme.radius.pill,
               paddingVertical: theme.spacing.md,
               paddingHorizontal: theme.spacing.xl,
@@ -186,7 +186,7 @@ export default function PreferencesSettingsScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -197,7 +197,7 @@ export default function PreferencesSettingsScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -214,7 +214,7 @@ export default function PreferencesSettingsScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -240,7 +240,7 @@ export default function PreferencesSettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -268,7 +268,7 @@ export default function PreferencesSettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -296,7 +296,7 @@ export default function PreferencesSettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -323,7 +323,7 @@ export default function PreferencesSettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -353,7 +353,7 @@ export default function PreferencesSettingsScreen() {
           {
             padding: theme.spacing.lg,
             borderTopWidth: 1,
-            borderTopColor: theme.colors.steel,
+            borderTopColor: theme.colors.surface3,
           },
         ]}
       >

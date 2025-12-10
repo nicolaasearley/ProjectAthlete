@@ -10,9 +10,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { Card, IconButton, Spacer } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { Card, IconButton, Spacer } from '@components';
+import { useUserStore } from '@core/store';
 
 type MainStackParamList = {
   Progress: undefined;
@@ -105,7 +105,7 @@ export default function StrengthDetailScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -116,7 +116,7 @@ export default function StrengthDetailScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -133,7 +133,7 @@ export default function StrengthDetailScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -161,7 +161,7 @@ export default function StrengthDetailScreen() {
               flexDirection: 'row',
               marginBottom: theme.spacing.lg,
               borderBottomWidth: 1,
-              borderBottomColor: theme.colors.steel,
+              borderBottomColor: theme.colors.surface3,
             },
           ]}
         >
@@ -214,7 +214,7 @@ export default function StrengthDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.xs,
@@ -227,7 +227,7 @@ export default function StrengthDetailScreen() {
             style={[
               styles.sectionSubtitle,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
                 marginBottom: theme.spacing.lg,
@@ -242,7 +242,7 @@ export default function StrengthDetailScreen() {
             style={[
               styles.chartPlaceholder,
               {
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.md,
                 padding: theme.spacing.xxxl,
                 marginBottom: theme.spacing.lg,
@@ -256,7 +256,7 @@ export default function StrengthDetailScreen() {
               style={[
                 styles.chartPlaceholderText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -281,7 +281,7 @@ export default function StrengthDetailScreen() {
                 style={[
                   styles.statLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -314,7 +314,7 @@ export default function StrengthDetailScreen() {
                 style={[
                   styles.statLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -341,7 +341,7 @@ export default function StrengthDetailScreen() {
                 style={[
                   styles.statLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -353,7 +353,7 @@ export default function StrengthDetailScreen() {
                 style={[
                   styles.statValue,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -375,7 +375,7 @@ export default function StrengthDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -395,7 +395,7 @@ export default function StrengthDetailScreen() {
                     paddingVertical: theme.spacing.md,
                     borderBottomWidth:
                       index < currentLiftData.prHistory.length - 1 ? 1 : 0,
-                    borderBottomColor: theme.colors.steel,
+                    borderBottomColor: theme.colors.surface3,
                   },
                 ]}
               >
@@ -403,7 +403,7 @@ export default function StrengthDetailScreen() {
                   style={[
                     styles.prDate,
                     {
-                      color: theme.colors.white,
+                      color: theme.colors.textPrimary,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.body,
                     },
@@ -431,7 +431,7 @@ export default function StrengthDetailScreen() {
               style={[
                 styles.emptyText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -452,7 +452,7 @@ export default function StrengthDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -489,7 +489,7 @@ export default function StrengthDetailScreen() {
           style={[
             styles.futureFeatureText,
             {
-              color: theme.colors.muted,
+              color: theme.colors.textMuted,
               fontFamily: theme.typography.fonts.body,
               fontSize: theme.typography.sizes.bodySmall,
               textAlign: 'center',

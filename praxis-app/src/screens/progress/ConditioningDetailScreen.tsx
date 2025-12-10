@@ -10,9 +10,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { Card, IconButton, Spacer } from '../../components';
-import { useSessionStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { Card, IconButton, Spacer } from '@components';
+import { useSessionStore } from '@core/store';
 
 type MainStackParamList = {
   Progress: undefined;
@@ -91,7 +91,7 @@ export default function ConditioningDetailScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -102,7 +102,7 @@ export default function ConditioningDetailScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -119,7 +119,7 @@ export default function ConditioningDetailScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -149,7 +149,7 @@ export default function ConditioningDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -177,7 +177,7 @@ export default function ConditioningDetailScreen() {
                   style={[
                     styles.zoneLabel,
                     {
-                      color: theme.colors.white,
+                      color: theme.colors.textPrimary,
                       fontFamily: theme.typography.fonts.bodyMedium,
                       fontSize: theme.typography.sizes.body,
                       marginRight: theme.spacing.sm,
@@ -190,7 +190,7 @@ export default function ConditioningDetailScreen() {
                   style={[
                     styles.zoneLabel,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.body,
                     },
@@ -205,7 +205,7 @@ export default function ConditioningDetailScreen() {
                   {
                     flex: 1,
                     height: 24,
-                    backgroundColor: theme.colors.steel,
+                    backgroundColor: theme.colors.surface3,
                     borderRadius: theme.radius.sm,
                     marginLeft: theme.spacing.md,
                     overflow: 'hidden',
@@ -228,7 +228,7 @@ export default function ConditioningDetailScreen() {
                 style={[
                   styles.zonePercentage,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.body,
                     marginLeft: theme.spacing.md,
@@ -254,7 +254,7 @@ export default function ConditioningDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.xs,
@@ -267,7 +267,7 @@ export default function ConditioningDetailScreen() {
             style={[
               styles.sectionSubtitle,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
                 marginBottom: theme.spacing.lg,
@@ -282,7 +282,7 @@ export default function ConditioningDetailScreen() {
             style={[
               styles.chartPlaceholder,
               {
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.md,
                 padding: theme.spacing.xxxl,
                 marginBottom: theme.spacing.lg,
@@ -296,7 +296,7 @@ export default function ConditioningDetailScreen() {
               style={[
                 styles.chartPlaceholderText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -321,7 +321,7 @@ export default function ConditioningDetailScreen() {
                 style={[
                   styles.statLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -354,7 +354,7 @@ export default function ConditioningDetailScreen() {
                 style={[
                   styles.statLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -380,7 +380,7 @@ export default function ConditioningDetailScreen() {
                 style={[
                   styles.statLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -392,7 +392,7 @@ export default function ConditioningDetailScreen() {
                 style={[
                   styles.statValue,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -414,7 +414,7 @@ export default function ConditioningDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -438,7 +438,7 @@ export default function ConditioningDetailScreen() {
                       paddingVertical: theme.spacing.md,
                       borderBottomWidth:
                         index < mockIntervalSessions.length - 1 ? 1 : 0,
-                      borderBottomColor: theme.colors.steel,
+                      borderBottomColor: theme.colors.surface3,
                     },
                   ]}
                 >
@@ -446,7 +446,7 @@ export default function ConditioningDetailScreen() {
                     style={[
                       styles.intervalTitle,
                       {
-                        color: theme.colors.white,
+                        color: theme.colors.textPrimary,
                         fontFamily: theme.typography.fonts.body,
                         fontSize: theme.typography.sizes.body,
                         flex: 1,
@@ -460,7 +460,7 @@ export default function ConditioningDetailScreen() {
                       style={[
                         styles.intervalStat,
                         {
-                          color: theme.colors.muted,
+                          color: theme.colors.textMuted,
                           fontFamily: theme.typography.fonts.body,
                           fontSize: theme.typography.sizes.body,
                           marginRight: theme.spacing.sm,
@@ -483,7 +483,7 @@ export default function ConditioningDetailScreen() {
               style={[
                 styles.emptyText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -504,7 +504,7 @@ export default function ConditioningDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -520,7 +520,7 @@ export default function ConditioningDetailScreen() {
               style={[
                 styles.insightText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom:
@@ -544,7 +544,7 @@ export default function ConditioningDetailScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -560,7 +560,7 @@ export default function ConditioningDetailScreen() {
               {
                 paddingVertical: theme.spacing.md,
                 borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
+                borderBottomColor: theme.colors.surface3,
                 opacity: 0.4,
               },
             ]}
@@ -569,7 +569,7 @@ export default function ConditioningDetailScreen() {
               style={[
                 styles.futureFeatureLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -585,7 +585,7 @@ export default function ConditioningDetailScreen() {
               {
                 paddingVertical: theme.spacing.md,
                 borderBottomWidth: 1,
-                borderBottomColor: theme.colors.steel,
+                borderBottomColor: theme.colors.surface3,
                 opacity: 0.4,
               },
             ]}
@@ -594,7 +594,7 @@ export default function ConditioningDetailScreen() {
               style={[
                 styles.futureFeatureLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -617,7 +617,7 @@ export default function ConditioningDetailScreen() {
               style={[
                 styles.futureFeatureLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },

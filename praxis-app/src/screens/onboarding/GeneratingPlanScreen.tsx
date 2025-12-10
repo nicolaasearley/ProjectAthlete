@@ -2,29 +2,47 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useTheme } from '../../../theme';
-import { useUserStore, usePlanStore } from '../../../core/store';
-import { generateInitialPlan } from '../../../core/engine';
+import { useTheme } from '@theme';
+import { useUserStore, usePlanStore } from '@core/store';
+import { generateInitialPlan } from '@core/engine';
 import dayjs from 'dayjs';
-import { trackEvent, trackScreen } from '../../../core/analytics';
+import { trackEvent, trackScreen } from '@core/analytics';
 
 export default function GeneratingPlanScreen() {
   const theme = useTheme();
-  const { userProfile } = useUserStore();
-  const { setPlanDays } = usePlanStore();
+  const { userProfile, setHasCompletedOnboarding, preferences, hasProfile } = useUserStore();
+  const { setPlanDays, getTodayPlan } = usePlanStore();
 
   useEffect(() => {
     trackScreen('generating_plan');
-    trackEvent('plan_generation_started', {
-      hasProfile: Boolean(userProfile),
-    });
-
+    
     const generateAndNavigate = async () => {
       try {
+        // 1. Mark onboarding as completed FIRST, before any checks
+        console.log('[GeneratingPlanScreen] Setting onboarding as completed...');
+        setHasCompletedOnboarding(true);
+        
+        // 2. Wait a brief moment for state to persist
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // 3. Check hasProfile after setting onboarding complete
+        const profileStatus = hasProfile();
+        console.log('[GeneratingPlanScreen] hasProfile check:', {
+          hasProfile: profileStatus,
+          hasCompletedOnboarding: useUserStore.getState().hasCompletedOnboarding,
+          goal: preferences.goal,
+          experienceLevel: preferences.experienceLevel,
+          trainingDaysPerWeek: preferences.trainingDaysPerWeek,
+        });
+        
+        trackEvent('plan_generation_started', {
+          hasProfile: profileStatus,
+        });
+
         if (!userProfile) {
           // If no user profile, navigate anyway (shouldn't happen in normal flow)
           setTimeout(() => {
-            router.replace('/home');
+            router.replace('/today');
           }, 2000);
           return;
         }
@@ -48,25 +66,51 @@ export default function GeneratingPlanScreen() {
             trackEvent('plan_generation_completed', { status: 'fallback' });
           }
 
-          // Navigate to Home screen
-          router.replace('/home');
+          // Verify state before navigation
+          const finalCheck = hasProfile();
+          console.log('[GeneratingPlanScreen] Final hasProfile check before navigation:', finalCheck);
+          
+          // Navigate to today's workout if available, otherwise fallback to /start
+          const todayWorkout = getTodayPlan();
+          if (todayWorkout) {
+            console.log('[GeneratingPlanScreen] Navigating to today workout:', todayWorkout.id);
+            router.replace({
+              pathname: '/workout/overview',
+              params: { planDayId: todayWorkout.id },
+            });
+          } else {
+            console.log('[GeneratingPlanScreen] No workout found for today, navigating to /start');
+            router.replace('/start');
+          }
         }, 2000); // 2 second delay for loading animation
       } catch (error) {
         console.error('Error generating plan:', error);
         // Navigate anyway after delay
         trackEvent('plan_generation_completed', { status: 'error' });
         setTimeout(() => {
-          router.replace('/home');
+          const finalCheck = hasProfile();
+          console.log('[GeneratingPlanScreen] Error path - hasProfile check:', finalCheck);
+          
+          // Try to navigate to today's workout, fallback to /start
+          const todayWorkout = getTodayPlan();
+          if (todayWorkout) {
+            router.replace({
+              pathname: '/workout/overview',
+              params: { planDayId: todayWorkout.id },
+            });
+          } else {
+            router.replace('/start');
+          }
         }, 2000);
       }
     };
 
     generateAndNavigate();
-  }, [userProfile, setPlanDays]);
+  }, [userProfile, setPlanDays, setHasCompletedOnboarding, preferences, hasProfile, getTodayPlan]);
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.black }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top', 'bottom']}
     >
       <View style={[styles.content, { paddingHorizontal: theme.spacing.xl }]}>
@@ -96,7 +140,7 @@ export default function GeneratingPlanScreen() {
           style={[
             styles.title,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.heading,
               fontSize: theme.typography.sizes.h2,
               marginBottom: theme.spacing.md,
@@ -110,7 +154,7 @@ export default function GeneratingPlanScreen() {
           style={[
             styles.subtitle,
             {
-              color: theme.colors.muted,
+              color: theme.colors.textMuted,
               fontFamily: theme.typography.fonts.body,
               fontSize: theme.typography.sizes.body,
             },

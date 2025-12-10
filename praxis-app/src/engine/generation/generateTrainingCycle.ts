@@ -4,7 +4,7 @@ import type {
   TrainingGoal,
   ExperienceLevel,
   StrengthNumbers,
-} from '../../core/types';
+} from '@core/types';
 import { generateMicrocycle } from './generateMicrocycle';
 import dayjs from 'dayjs';
 

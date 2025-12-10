@@ -5,7 +5,7 @@ import {
   ViewStyle,
   ActivityIndicator,
 } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme } from '@theme';
 
 interface IconButtonProps {
   icon: ReactNode;
@@ -37,9 +37,9 @@ export default function IconButton({
   };
 
   const getBackgroundColor = (): string => {
-    if (variant === 'accent') return theme.colors.acidGreen;
+    if (variant === 'accent') return theme.colors.primary;
     if (variant === 'ghost') return 'transparent';
-    return theme.colors.steel;
+    return theme.colors.surface3;
   };
 
   const buttonSize = getButtonSize();
@@ -65,7 +65,7 @@ export default function IconButton({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'accent' ? theme.colors.black : theme.colors.white}
+          color={variant === 'accent' ? theme.colors.textPrimary : theme.colors.textPrimary}
           size="small"
         />
       ) : (

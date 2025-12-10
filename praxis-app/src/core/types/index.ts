@@ -222,3 +222,8 @@ export interface PRRecord {
   estimated1RM: number;
   changeFromPrevious?: number;
 }
+
+// ------- NEW EXERCISE TYPES (Phase 5-6) -------
+
+// Export new exercise types from exercise.ts
+export * from './exercise';

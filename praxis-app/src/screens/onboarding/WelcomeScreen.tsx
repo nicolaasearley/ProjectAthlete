@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useTheme } from '../../../theme';
-import { PraxisButton } from '../../components';
+import { useTheme } from '@theme';
+import { PraxisButton } from '@components';
 
 export default function WelcomeScreen() {
   const theme = useTheme();
@@ -14,7 +14,7 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top', 'bottom']}
     >
       <View style={[styles.content, { paddingHorizontal: theme.spacing.xl }]}>
@@ -22,7 +22,7 @@ export default function WelcomeScreen() {
           style={[
             styles.icon,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               marginBottom: theme.spacing.xxl,
             },
           ]}
@@ -33,7 +33,7 @@ export default function WelcomeScreen() {
           style={[
             styles.heading,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.heading,
               fontSize: theme.typography.sizes.h1,
               marginBottom: theme.spacing.md,
@@ -46,7 +46,7 @@ export default function WelcomeScreen() {
           style={[
             styles.subtitle,
             {
-              color: theme.colors.muted,
+              color: theme.colors.textMuted,
               fontFamily: theme.typography.fonts.body,
               fontSize: theme.typography.sizes.body,
             },

@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import { useTheme } from '../../../theme';
-import { Card, PraxisButton, Spacer } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { Card, PraxisButton, Spacer } from '@components';
+import { useUserStore } from '@core/store';
 
 type MainStackParamList = {
   StrengthDetail: undefined;
@@ -107,7 +107,7 @@ export default function ProgressScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -118,7 +118,7 @@ export default function ProgressScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -126,7 +126,7 @@ export default function ProgressScreen() {
           style={[
             styles.headerTitle,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.headingMedium,
               fontSize: theme.typography.sizes.h2,
             },
@@ -154,7 +154,7 @@ export default function ProgressScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.xl,
@@ -176,7 +176,7 @@ export default function ProgressScreen() {
                     index < mockStrengthLifts.length - 1 ? theme.spacing.lg : 0,
                   borderBottomWidth:
                     index < mockStrengthLifts.length - 1 ? 1 : 0,
-                  borderBottomColor: theme.colors.steel,
+                  borderBottomColor: theme.colors.surface3,
                 },
               ]}
             >
@@ -185,7 +185,7 @@ export default function ProgressScreen() {
                   style={[
                     styles.liftName,
                     {
-                      color: theme.colors.white,
+                      color: theme.colors.textPrimary,
                       fontFamily: theme.typography.fonts.headingMedium,
                       fontSize: theme.typography.sizes.body,
                       marginBottom: theme.spacing.xs,
@@ -211,7 +211,7 @@ export default function ProgressScreen() {
                   style={[
                     styles.liftChange,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.bodySmall,
                     },
@@ -244,7 +244,7 @@ export default function ProgressScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.xl,
@@ -259,7 +259,7 @@ export default function ProgressScreen() {
               style={[
                 styles.conditioningLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.bodyMedium,
                   fontSize: theme.typography.sizes.bodySmall,
                   marginBottom: theme.spacing.sm,
@@ -272,7 +272,7 @@ export default function ProgressScreen() {
               style={[
                 styles.conditioningValue,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom: theme.spacing.lg,
@@ -290,7 +290,7 @@ export default function ProgressScreen() {
               style={[
                 styles.conditioningLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.bodyMedium,
                   fontSize: theme.typography.sizes.bodySmall,
                   marginBottom: theme.spacing.sm,
@@ -303,7 +303,7 @@ export default function ProgressScreen() {
               style={[
                 styles.conditioningValue,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom: theme.spacing.lg,
@@ -318,7 +318,7 @@ export default function ProgressScreen() {
               style={[
                 styles.conditioningLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.bodyMedium,
                   fontSize: theme.typography.sizes.bodySmall,
                   marginBottom: theme.spacing.sm,
@@ -362,7 +362,7 @@ export default function ProgressScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.xl,
@@ -380,7 +380,7 @@ export default function ProgressScreen() {
                   marginBottom: theme.spacing.md,
                   paddingBottom: theme.spacing.md,
                   borderBottomWidth: 1,
-                  borderBottomColor: theme.colors.steel,
+                  borderBottomColor: theme.colors.surface3,
                 },
               ]}
             >
@@ -388,7 +388,7 @@ export default function ProgressScreen() {
                 style={[
                   styles.readinessLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -422,7 +422,7 @@ export default function ProgressScreen() {
                 style={[
                   styles.readinessLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                   },
@@ -456,7 +456,7 @@ export default function ProgressScreen() {
                 style={[
                   styles.readinessLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.bodySmall,
                   },
@@ -468,7 +468,7 @@ export default function ProgressScreen() {
                 style={[
                   styles.readinessDayValue,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.bodySmall,
                   },
@@ -484,7 +484,7 @@ export default function ProgressScreen() {
                 style={[
                   styles.readinessLabel,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.bodySmall,
                   },
@@ -496,7 +496,7 @@ export default function ProgressScreen() {
                 style={[
                   styles.readinessDayValue,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.bodyMedium,
                     fontSize: theme.typography.sizes.bodySmall,
                   },
@@ -528,7 +528,7 @@ export default function ProgressScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.xl,
@@ -546,7 +546,7 @@ export default function ProgressScreen() {
                   style={[
                     styles.prItem,
                     {
-                      color: theme.colors.white,
+                      color: theme.colors.textPrimary,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.body,
                       marginBottom:
@@ -563,7 +563,7 @@ export default function ProgressScreen() {
               style={[
                 styles.emptyText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },

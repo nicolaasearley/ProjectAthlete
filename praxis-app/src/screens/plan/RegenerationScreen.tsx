@@ -4,13 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { Card, IconButton, PraxisButton, Spacer } from '../../components';
-import { useUserStore } from '../../../core/store';
-import { usePlanStore } from '../../../core/store';
-import { generateDailyWorkout } from '../../../engine/generation/generateDailyWorkout';
-import { generateMicrocycle } from '../../../engine/generation/generateMicrocycle';
-import { generateTrainingCycle } from '../../../engine/generation/generateTrainingCycle';
+import { useTheme } from '@theme';
+import { Card, IconButton, PraxisButton, Spacer } from '@components';
+import { useUserStore } from '@core/store';
+import { usePlanStore } from '@core/store';
+import { generateDailyWorkout } from '@engine/generation/generateDailyWorkout';
+import { generateMicrocycle } from '@engine/generation/generateMicrocycle';
+import { generateTrainingCycle } from '@engine/generation/generateTrainingCycle';
 
 type MainStackParamList = {
   Home: undefined;
@@ -171,7 +171,7 @@ export default function RegenerationScreen() {
   if (plan.length === 0) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        style={[styles.container, { backgroundColor: theme.colors.appBg }]}
         edges={['top', 'bottom']}
       >
         <View
@@ -181,7 +181,7 @@ export default function RegenerationScreen() {
               paddingHorizontal: theme.spacing.lg,
               paddingVertical: theme.spacing.md,
               borderBottomWidth: 1,
-              borderBottomColor: theme.colors.steel,
+              borderBottomColor: theme.colors.surface3,
             },
           ]}
         >
@@ -202,7 +202,7 @@ export default function RegenerationScreen() {
               style={[
                 styles.headerTitle,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.heading,
                   fontSize: theme.typography.sizes.h2,
                 },
@@ -226,7 +226,7 @@ export default function RegenerationScreen() {
             style={[
               styles.errorTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.md,
@@ -247,7 +247,7 @@ export default function RegenerationScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.black }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -258,7 +258,7 @@ export default function RegenerationScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -275,7 +275,7 @@ export default function RegenerationScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -300,7 +300,7 @@ export default function RegenerationScreen() {
           style={[
             styles.subtitle,
             {
-              color: theme.colors.muted,
+              color: theme.colors.textMuted,
               fontFamily: theme.typography.fonts.body,
               fontSize: theme.typography.sizes.body,
               marginBottom: theme.spacing.xl,
@@ -316,7 +316,7 @@ export default function RegenerationScreen() {
           variant="elevated"
           padding="lg"
           style={{
-            backgroundColor: theme.colors.graphite,
+            backgroundColor: theme.colors.surface2,
             borderRadius: theme.radius.lg,
             marginBottom: theme.spacing.lg,
           }}
@@ -325,7 +325,7 @@ export default function RegenerationScreen() {
             style={[
               styles.optionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.sm,
@@ -338,7 +338,7 @@ export default function RegenerationScreen() {
             style={[
               styles.optionDescription,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
                 marginBottom: theme.spacing.md,
@@ -361,7 +361,7 @@ export default function RegenerationScreen() {
           variant="elevated"
           padding="lg"
           style={{
-            backgroundColor: theme.colors.graphite,
+            backgroundColor: theme.colors.surface2,
             borderRadius: theme.radius.lg,
             marginBottom: theme.spacing.lg,
           }}
@@ -370,7 +370,7 @@ export default function RegenerationScreen() {
             style={[
               styles.optionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.sm,
@@ -383,7 +383,7 @@ export default function RegenerationScreen() {
             style={[
               styles.optionDescription,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
                 marginBottom: theme.spacing.md,
@@ -406,7 +406,7 @@ export default function RegenerationScreen() {
           variant="elevated"
           padding="lg"
           style={{
-            backgroundColor: theme.colors.graphite,
+            backgroundColor: theme.colors.surface2,
             borderRadius: theme.radius.lg,
             marginBottom: theme.spacing.lg,
           }}
@@ -415,7 +415,7 @@ export default function RegenerationScreen() {
             style={[
               styles.optionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.sm,
@@ -428,7 +428,7 @@ export default function RegenerationScreen() {
             style={[
               styles.optionDescription,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
                 marginBottom: theme.spacing.md,

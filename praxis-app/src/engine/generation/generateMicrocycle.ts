@@ -3,7 +3,8 @@ import type {
   TrainingGoal,
   ExperienceLevel,
   StrengthNumbers,
-} from '../../core/types';
+  TrainingPreferences,
+} from '@core/types';
 import { generateDailyWorkout } from './generateDailyWorkout';
 import dayjs from 'dayjs';
 
@@ -19,6 +20,88 @@ export interface MicrocycleParams {
 }
 
 type DayFocus = 'strength' | 'conditioning' | 'mixed' | 'rest';
+
+/**
+ * NEW WEEKLY GOAL TEMPLATES
+ */
+const WEEKLY_TEMPLATES = {
+  strength: [
+    'squat',
+    'hinge',
+    'upper_push_pull',
+    'squat',
+    'hinge',
+    'upper_push_pull',
+    'rest',
+  ],
+
+  hybrid: [
+    'squat',
+    'upper_push_pull',
+    'conditioning',
+    'hinge',
+    'mixed_full_body',
+    'conditioning',
+    'rest',
+  ],
+
+  conditioning: [
+    'conditioning',
+    'conditioning',
+    'conditioning',
+    'conditioning',
+    'conditioning',
+    'conditioning',
+    'rest',
+  ],
+
+  general: [
+    'squat',
+    'upper_push_pull',
+    'conditioning',
+    'hinge',
+    'mixed_full_body',
+    'conditioning',
+    'rest',
+  ],
+} as const;
+
+/**
+ * Helper: Apply Technique Week adjustments (week 4 of cycle)
+ */
+function applyTechniqueWeekModifiers(blocks: any[]) {
+  return blocks.map((block) => {
+    if (block.type === 'strength' && block.strengthMain) {
+      return {
+        ...block,
+        title: block.title + ' (Technique)',
+        strengthMain: {
+          ...block.strengthMain,
+          sets: block.strengthMain.sets.map((set: any) => ({
+            ...set,
+            targetRpe: Math.max(5, (set.targetRpe ?? 7) - 2),
+          })),
+        },
+      };
+    }
+
+    if (block.type === 'conditioning' && block.conditioning) {
+      const currentZone = parseInt(
+        block.conditioning.targetZone?.replace('Z', '') || '2'
+      );
+      return {
+        ...block,
+        conditioning: {
+          ...block.conditioning,
+          targetZone: `Z${Math.max(1, currentZone - 1)}`,
+          notes: 'Technique Week – Reduced Intensity',
+        },
+      };
+    }
+
+    return block;
+  });
+}
 
 /**
  * Add days to a date string
@@ -153,6 +236,7 @@ function createTrainingDay(
     units: params.units,
     strengthNumbers: params.strengthNumbers,
     userId: params.userId,
+    dayIndex,
   });
 
   // Override with microcycle-specific values
@@ -167,40 +251,78 @@ function createTrainingDay(
 }
 
 /**
- * Generate a complete microcycle (training week)
- *
- * @param params - Microcycle generation parameters
- * @returns Array of WorkoutPlanDay objects for the week
+ * Map template focus to actual workout goal
+ */
+function mapTemplateFocusToGoal(
+  focus: string,
+  baseGoal: TrainingGoal
+): TrainingGoal {
+  if (focus === 'rest') {
+    return baseGoal; // Not used for rest days
+  }
+  if (focus === 'conditioning') {
+    return 'conditioning';
+  }
+  if (focus.includes('squat') || focus.includes('hinge')) {
+    return 'strength';
+  }
+  if (focus.includes('upper') || focus.includes('mixed')) {
+    return 'hybrid';
+  }
+  return baseGoal;
+}
+
+/**
+ * GENERATE 6-WEEK CYCLE USING WEEKLY TEMPLATES
  */
 export function generateMicrocycle(params: MicrocycleParams): WorkoutPlanDay[] {
-  const { startDate, goal, trainingDaysPerWeek } = params;
+  const template = WEEKLY_TEMPLATES[params.goal ?? 'hybrid'];
+  const weeks = 6;
+  const cycle: WorkoutPlanDay[] = [];
 
-  // Generate day focus pattern
-  const dayFocusPattern = generateDayFocusPattern(trainingDaysPerWeek);
+  for (let week = 0; week < weeks; week++) {
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+      const focus = template[dayIndex];
+      const date = dayjs(params.startDate)
+        .add(week * 7 + dayIndex, 'day')
+        .format('YYYY-MM-DD');
 
-  // Generate workout plan days for the week
-  const microcycle: WorkoutPlanDay[] = [];
+      if (focus === 'rest') {
+        // Create rest day
+        cycle.push(
+          createRestDay(date, dayIndex, params.userId || 'user-placeholder')
+        );
+      } else {
+        // Map template focus to workout goal
+        const workoutGoal = mapTemplateFocusToGoal(focus, params.goal);
 
-  for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
-    const date = addDays(startDate, dayIndex);
-    const focus = dayFocusPattern[dayIndex];
+        // Generate base workout with template focus override
+        const baseWorkout = generateDailyWorkout({
+          goal: workoutGoal,
+          experienceLevel: params.experienceLevel,
+          equipmentIds: params.equipmentIds,
+          units: params.units,
+          strengthNumbers: params.strengthNumbers,
+          userId: params.userId,
+          dayIndex: week * 7 + dayIndex,
+          date,
+          focusPatternOverride: focus, // ← main pattern comes from weekly template
+          weekIndex: week,
+        });
 
-    if (focus === 'rest') {
-      // Create rest day
-      microcycle.push(
-        createRestDay(date, dayIndex, params.userId || 'user-placeholder')
-      );
-    } else {
-      // Create training day
-      microcycle.push(createTrainingDay(date, dayIndex, focus, goal, params));
+        // TECHNIQUE WEEK (week 3, zero-based → 4th calendar week)
+        const finalWorkout =
+          week === 3
+            ? {
+                ...baseWorkout,
+                blocks: applyTechniqueWeekModifiers(baseWorkout.blocks),
+              }
+            : baseWorkout;
+
+        cycle.push(finalWorkout);
+      }
     }
   }
 
-  // TODO: Integrate userId from userStore
-  // TODO: Support variable microcycle lengths (e.g., 5-day microcycle)
-  // TODO: Integrate periodization (heavy/light days)
-  // TODO: Support different templates per experience level
-  // TODO: Support deload weeks
-
-  return microcycle;
+  return cycle;
 }

@@ -214,7 +214,7 @@ export default function ActiveWorkoutScreen() {
   if (!today) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        style={[styles.container, { backgroundColor: theme.colors.appBg }]}
         edges={['top', 'bottom']}
       >
         <View
@@ -229,7 +229,7 @@ export default function ActiveWorkoutScreen() {
             style={[
               styles.errorTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.md,
@@ -252,7 +252,7 @@ export default function ActiveWorkoutScreen() {
   if (blockIndex >= today.blocks.length) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        style={[styles.container, { backgroundColor: theme.colors.appBg }]}
         edges={['top', 'bottom']}
       >
         <View
@@ -267,7 +267,7 @@ export default function ActiveWorkoutScreen() {
             style={[
               styles.completeTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h1,
                 marginBottom: theme.spacing.md,
@@ -295,7 +295,7 @@ export default function ActiveWorkoutScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.black }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -306,7 +306,7 @@ export default function ActiveWorkoutScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -323,7 +323,7 @@ export default function ActiveWorkoutScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.xs,
@@ -349,7 +349,7 @@ export default function ActiveWorkoutScreen() {
             style={[
               styles.duration,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
                 marginTop: theme.spacing.xs,
@@ -379,7 +379,7 @@ export default function ActiveWorkoutScreen() {
             style={[
               styles.blockTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.md,
@@ -395,7 +395,7 @@ export default function ActiveWorkoutScreen() {
               variant="elevated"
               padding="lg"
               style={{
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.lg,
               }}
             >
@@ -403,7 +403,7 @@ export default function ActiveWorkoutScreen() {
                 style={[
                   styles.exerciseName,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.headingMedium,
                     fontSize: theme.typography.sizes.h3,
                     marginBottom: theme.spacing.md,
@@ -418,7 +418,7 @@ export default function ActiveWorkoutScreen() {
                   style={[
                     styles.prescription,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.body,
                       marginBottom: theme.spacing.lg,
@@ -457,7 +457,7 @@ export default function ActiveWorkoutScreen() {
                   style={[
                     styles.inputLabel,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.bodyMedium,
                       fontSize: theme.typography.sizes.bodySmall,
                       marginBottom: theme.spacing.sm,
@@ -470,9 +470,9 @@ export default function ActiveWorkoutScreen() {
                   style={[
                     styles.input,
                     {
-                      backgroundColor: theme.colors.graphite,
-                      borderColor: theme.colors.steel,
-                      color: theme.colors.white,
+                      backgroundColor: theme.colors.surface2,
+                      borderColor: theme.colors.surface3,
+                      color: theme.colors.textPrimary,
                       borderRadius: theme.radius.md,
                       paddingVertical: theme.spacing.md,
                       paddingHorizontal: theme.spacing.lg,
@@ -491,7 +491,7 @@ export default function ActiveWorkoutScreen() {
                   style={[
                     styles.inputLabel,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.bodyMedium,
                       fontSize: theme.typography.sizes.bodySmall,
                       marginBottom: theme.spacing.sm,
@@ -504,9 +504,9 @@ export default function ActiveWorkoutScreen() {
                   style={[
                     styles.input,
                     {
-                      backgroundColor: theme.colors.graphite,
-                      borderColor: theme.colors.steel,
-                      color: theme.colors.white,
+                      backgroundColor: theme.colors.surface2,
+                      borderColor: theme.colors.surface3,
+                      color: theme.colors.textPrimary,
                       borderRadius: theme.radius.md,
                       paddingVertical: theme.spacing.md,
                       paddingHorizontal: theme.spacing.lg,
@@ -525,7 +525,7 @@ export default function ActiveWorkoutScreen() {
                   style={[
                     styles.inputLabel,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.bodyMedium,
                       fontSize: theme.typography.sizes.bodySmall,
                       marginBottom: theme.spacing.sm,
@@ -538,9 +538,9 @@ export default function ActiveWorkoutScreen() {
                   style={[
                     styles.input,
                     {
-                      backgroundColor: theme.colors.graphite,
-                      borderColor: theme.colors.steel,
-                      color: theme.colors.white,
+                      backgroundColor: theme.colors.surface2,
+                      borderColor: theme.colors.surface3,
+                      color: theme.colors.textPrimary,
                       borderRadius: theme.radius.md,
                       paddingVertical: theme.spacing.md,
                       paddingHorizontal: theme.spacing.lg,
@@ -605,7 +605,7 @@ export default function ActiveWorkoutScreen() {
               variant="elevated"
               padding="lg"
               style={{
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.lg,
               }}
             >
@@ -613,7 +613,7 @@ export default function ActiveWorkoutScreen() {
                 style={[
                   styles.prescription,
                   {
-                    color: theme.colors.muted,
+                    color: theme.colors.textMuted,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                     marginBottom: theme.spacing.md,
@@ -627,7 +627,7 @@ export default function ActiveWorkoutScreen() {
                 style={[
                   styles.prescription,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.body,
                     fontSize: theme.typography.sizes.body,
                     marginBottom: theme.spacing.sm,
@@ -642,7 +642,7 @@ export default function ActiveWorkoutScreen() {
                   style={[
                     styles.prescription,
                     {
-                      color: theme.colors.white,
+                      color: theme.colors.textPrimary,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.body,
                       marginBottom: theme.spacing.sm,
@@ -690,7 +690,7 @@ export default function ActiveWorkoutScreen() {
                   style={[
                     styles.timerContainer,
                     {
-                      backgroundColor: theme.colors.graphite,
+                      backgroundColor: theme.colors.surface2,
                       borderRadius: theme.radius.md,
                       padding: theme.spacing.lg,
                       marginBottom: theme.spacing.md,
@@ -733,7 +733,7 @@ export default function ActiveWorkoutScreen() {
                       style={[
                         styles.inputLabel,
                         {
-                          color: theme.colors.muted,
+                          color: theme.colors.textMuted,
                           fontFamily: theme.typography.fonts.bodyMedium,
                           fontSize: theme.typography.sizes.bodySmall,
                           marginBottom: theme.spacing.sm,
@@ -746,9 +746,9 @@ export default function ActiveWorkoutScreen() {
                       style={[
                         styles.input,
                         {
-                          backgroundColor: theme.colors.graphite,
-                          borderColor: theme.colors.steel,
-                          color: theme.colors.white,
+                          backgroundColor: theme.colors.surface2,
+                          borderColor: theme.colors.surface3,
+                          color: theme.colors.textPrimary,
                           borderRadius: theme.radius.md,
                           paddingVertical: theme.spacing.md,
                           paddingHorizontal: theme.spacing.lg,
@@ -807,7 +807,7 @@ export default function ActiveWorkoutScreen() {
               variant="elevated"
               padding="lg"
               style={{
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.lg,
               }}
             >
@@ -818,7 +818,7 @@ export default function ActiveWorkoutScreen() {
                       style={[
                         styles.exerciseName,
                         {
-                          color: theme.colors.white,
+                          color: theme.colors.textPrimary,
                           fontFamily: theme.typography.fonts.bodyMedium,
                           fontSize: theme.typography.sizes.body,
                           marginBottom: theme.spacing.xs,
@@ -831,7 +831,7 @@ export default function ActiveWorkoutScreen() {
                       style={[
                         styles.prescription,
                         {
-                          color: theme.colors.muted,
+                          color: theme.colors.textMuted,
                           fontFamily: theme.typography.fonts.body,
                           fontSize: theme.typography.sizes.bodySmall,
                         },
@@ -878,7 +878,7 @@ export default function ActiveWorkoutScreen() {
               variant="elevated"
               padding="lg"
               style={{
-                backgroundColor: theme.colors.graphite,
+                backgroundColor: theme.colors.surface2,
                 borderRadius: theme.radius.lg,
               }}
             >
@@ -890,7 +890,7 @@ export default function ActiveWorkoutScreen() {
                       style={[
                         styles.instructionItem,
                         {
-                          color: theme.colors.white,
+                          color: theme.colors.textPrimary,
                           fontFamily: theme.typography.fonts.body,
                           fontSize: theme.typography.sizes.body,
                           marginBottom:
@@ -914,7 +914,7 @@ export default function ActiveWorkoutScreen() {
                       style={[
                         styles.instructionItem,
                         {
-                          color: theme.colors.white,
+                          color: theme.colors.textPrimary,
                           fontFamily: theme.typography.fonts.body,
                           fontSize: theme.typography.sizes.body,
                           marginBottom:
@@ -953,7 +953,7 @@ export default function ActiveWorkoutScreen() {
             {
               padding: theme.spacing.lg,
               borderTopWidth: 1,
-              borderTopColor: theme.colors.steel,
+              borderTopColor: theme.colors.surface3,
             },
           ]}
         >

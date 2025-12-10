@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme } from '@theme';
 
 interface ChipProps {
   label: string;
@@ -24,17 +24,17 @@ export default function Chip({
   const theme = useTheme();
 
   const getBackgroundColor = (): string => {
-    if (variant === 'accent') return theme.colors.acidGreen;
+    if (variant === 'accent') return theme.colors.primary;
     if (variant === 'success') return theme.colors.success;
     if (variant === 'warning') return theme.colors.warning;
     if (variant === 'danger') return theme.colors.danger;
-    return theme.colors.steel;
+    return theme.colors.surface3;
   };
 
   const getTextColor = (): string => {
-    if (variant === 'accent') return theme.colors.black;
-    if (variant === 'default') return theme.colors.white;
-    return theme.colors.black;
+    if (variant === 'accent') return theme.colors.textPrimary;
+    if (variant === 'default') return theme.colors.textSecondary;
+    return theme.colors.textPrimary;
   };
 
   const Component = onPress ? TouchableOpacity : View;

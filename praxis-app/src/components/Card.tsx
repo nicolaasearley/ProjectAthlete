@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme } from '@theme';
 
 interface CardProps {
   children: ReactNode;
@@ -22,9 +22,9 @@ export default function Card({
       style={[
         styles.card,
         {
-          backgroundColor: theme.colors.graphite,
+          backgroundColor: variant === 'elevated' ? theme.colors.surface2 : theme.colors.surface1,
           padding: theme.spacing[padding],
-          borderRadius: theme.radius.md,
+          borderRadius: theme.radius.xl,
         },
         variant === 'elevated' && theme.shadows.card,
         style,

@@ -9,9 +9,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { PraxisButton } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { PraxisButton } from '@components';
+import { useUserStore } from '@core/store';
 
 const equipmentOptions: { id: string; name: string }[] = [
   { id: 'barbell', name: 'Barbell & Plates' },
@@ -50,7 +50,7 @@ export default function EquipmentScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top', 'bottom']}
     >
       <View
@@ -66,7 +66,7 @@ export default function EquipmentScreen() {
           style={[
             styles.title,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.heading,
               fontSize: theme.typography.sizes.h2,
               marginBottom: theme.spacing.xxxl,
@@ -95,11 +95,11 @@ export default function EquipmentScreen() {
                   style={[
                     styles.equipmentRow,
                     {
-                      backgroundColor: theme.colors.graphite,
+                      backgroundColor: theme.colors.surface2,
                       borderWidth: isSelected ? 2 : 1,
                       borderColor: isSelected
                         ? theme.colors.acidGreen
-                        : theme.colors.steel,
+                        : theme.colors.surface3,
                       borderRadius: theme.radius.md,
                       paddingVertical: theme.spacing.lg,
                       paddingHorizontal: theme.spacing.lg,
@@ -111,7 +111,7 @@ export default function EquipmentScreen() {
                     style={[
                       styles.equipmentText,
                       {
-                        color: theme.colors.white,
+                        color: theme.colors.textPrimary,
                         fontFamily: theme.typography.fonts.bodyMedium,
                         fontSize: theme.typography.sizes.body,
                       },

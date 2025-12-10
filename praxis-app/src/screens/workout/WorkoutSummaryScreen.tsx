@@ -4,15 +4,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { Card, IconButton, PraxisButton, Spacer, Chip } from '../../components';
-import { usePlanStore } from '../../../core/store';
-import { detectNewPRs } from '../../../engine/progress/detectPRs';
+import { useTheme } from '@theme';
+import { Card, IconButton, PraxisButton, Spacer, Chip } from '@components';
+import { usePlanStore } from '@core/store';
+import { detectNewPRs } from '@engine/progress/detectPRs';
 import type {
   WorkoutSessionLog,
   PRRecord,
   CompletedSet,
-} from '../../../core/types';
+} from '@core/types';
 import dayjs from 'dayjs';
 
 type MainStackParamList = {
@@ -143,7 +143,7 @@ export default function WorkoutSummaryScreen() {
   if (!session) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.black }]}
+        style={[styles.container, { backgroundColor: theme.colors.appBg }]}
         edges={['top', 'bottom']}
       >
         <View
@@ -158,7 +158,7 @@ export default function WorkoutSummaryScreen() {
             style={[
               styles.errorTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.md,
@@ -179,7 +179,7 @@ export default function WorkoutSummaryScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.black }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -190,7 +190,7 @@ export default function WorkoutSummaryScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -207,7 +207,7 @@ export default function WorkoutSummaryScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.heading,
                 fontSize: theme.typography.sizes.h2,
                 marginBottom: theme.spacing.xs,
@@ -220,7 +220,7 @@ export default function WorkoutSummaryScreen() {
             style={[
               styles.headerDate,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
               },
@@ -246,7 +246,7 @@ export default function WorkoutSummaryScreen() {
             variant="elevated"
             padding="lg"
             style={{
-              backgroundColor: theme.colors.graphite,
+              backgroundColor: theme.colors.surface2,
               borderRadius: theme.radius.lg,
               marginBottom: theme.spacing.lg,
             }}
@@ -262,7 +262,7 @@ export default function WorkoutSummaryScreen() {
                 style={[
                   styles.sectionTitle,
                   {
-                    color: theme.colors.white,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.typography.fonts.headingMedium,
                     fontSize: theme.typography.sizes.h2,
                   },
@@ -303,7 +303,7 @@ export default function WorkoutSummaryScreen() {
                 style={[
                   styles.prCard,
                   {
-                    backgroundColor: theme.colors.graphite,
+                    backgroundColor: theme.colors.surface2,
                     borderRadius: theme.radius.md,
                     padding: theme.spacing.md,
                     borderWidth: 2,
@@ -317,7 +317,7 @@ export default function WorkoutSummaryScreen() {
                   style={[
                     styles.prExercise,
                     {
-                      color: theme.colors.white,
+                      color: theme.colors.textPrimary,
                       fontFamily: theme.typography.fonts.headingMedium,
                       fontSize: theme.typography.sizes.h3,
                       marginBottom: theme.spacing.xs,
@@ -343,7 +343,7 @@ export default function WorkoutSummaryScreen() {
                     style={[
                       styles.prChange,
                       {
-                        color: theme.colors.muted,
+                        color: theme.colors.textMuted,
                         fontFamily: theme.typography.fonts.body,
                         fontSize: theme.typography.sizes.bodySmall,
                         marginTop: theme.spacing.xs,
@@ -361,7 +361,7 @@ export default function WorkoutSummaryScreen() {
             variant="elevated"
             padding="lg"
             style={{
-              backgroundColor: theme.colors.graphite,
+              backgroundColor: theme.colors.surface2,
               borderRadius: theme.radius.lg,
               marginBottom: theme.spacing.lg,
             }}
@@ -370,7 +370,7 @@ export default function WorkoutSummaryScreen() {
               style={[
                 styles.emptyText,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   textAlign: 'center',
@@ -388,7 +388,7 @@ export default function WorkoutSummaryScreen() {
             variant="elevated"
             padding="lg"
             style={{
-              backgroundColor: theme.colors.graphite,
+              backgroundColor: theme.colors.surface2,
               borderRadius: theme.radius.lg,
               marginBottom: theme.spacing.lg,
             }}
@@ -397,7 +397,7 @@ export default function WorkoutSummaryScreen() {
               style={[
                 styles.sectionTitle,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.headingMedium,
                   fontSize: theme.typography.sizes.h3,
                   marginBottom: theme.spacing.md,
@@ -436,7 +436,7 @@ export default function WorkoutSummaryScreen() {
                         {
                           paddingVertical: theme.spacing.sm,
                           borderBottomWidth: index < sets.length - 1 ? 1 : 0,
-                          borderBottomColor: theme.colors.steel,
+                          borderBottomColor: theme.colors.surface3,
                         },
                       ]}
                     >
@@ -445,7 +445,7 @@ export default function WorkoutSummaryScreen() {
                           style={[
                             styles.setExercise,
                             {
-                              color: theme.colors.white,
+                              color: theme.colors.textPrimary,
                               fontFamily: theme.typography.fonts.bodyMedium,
                               fontSize: theme.typography.sizes.body,
                             },
@@ -457,7 +457,7 @@ export default function WorkoutSummaryScreen() {
                           style={[
                             styles.setDetails,
                             {
-                              color: theme.colors.muted,
+                              color: theme.colors.textMuted,
                               fontFamily: theme.typography.fonts.body,
                               fontSize: theme.typography.sizes.bodySmall,
                               marginTop: 4,
@@ -485,7 +485,7 @@ export default function WorkoutSummaryScreen() {
             variant="elevated"
             padding="lg"
             style={{
-              backgroundColor: theme.colors.graphite,
+              backgroundColor: theme.colors.surface2,
               borderRadius: theme.radius.lg,
               marginBottom: theme.spacing.lg,
             }}
@@ -494,7 +494,7 @@ export default function WorkoutSummaryScreen() {
               style={[
                 styles.sectionTitle,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.headingMedium,
                   fontSize: theme.typography.sizes.h3,
                   marginBottom: theme.spacing.md,
@@ -513,7 +513,7 @@ export default function WorkoutSummaryScreen() {
                     paddingVertical: theme.spacing.sm,
                     borderBottomWidth:
                       index < session.conditioningRounds.length - 1 ? 1 : 0,
-                    borderBottomColor: theme.colors.steel,
+                    borderBottomColor: theme.colors.surface3,
                   },
                 ]}
               >
@@ -521,7 +521,7 @@ export default function WorkoutSummaryScreen() {
                   style={[
                     styles.roundLabel,
                     {
-                      color: theme.colors.white,
+                      color: theme.colors.textPrimary,
                       fontFamily: theme.typography.fonts.bodyMedium,
                       fontSize: theme.typography.sizes.body,
                       marginBottom: 4,
@@ -534,7 +534,7 @@ export default function WorkoutSummaryScreen() {
                   style={[
                     styles.roundDetails,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.bodySmall,
                     },
@@ -556,7 +556,7 @@ export default function WorkoutSummaryScreen() {
             variant="elevated"
             padding="lg"
             style={{
-              backgroundColor: theme.colors.graphite,
+              backgroundColor: theme.colors.surface2,
               borderRadius: theme.radius.lg,
               marginBottom: theme.spacing.lg,
             }}
@@ -565,7 +565,7 @@ export default function WorkoutSummaryScreen() {
               style={[
                 styles.durationText,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                 },
@@ -586,7 +586,7 @@ export default function WorkoutSummaryScreen() {
           {
             padding: theme.spacing.lg,
             borderTopWidth: 1,
-            borderTopColor: theme.colors.steel,
+            borderTopColor: theme.colors.surface3,
           },
         ]}
       >

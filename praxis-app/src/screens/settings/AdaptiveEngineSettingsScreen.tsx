@@ -11,10 +11,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { PraxisButton, IconButton, Card, Spacer } from '../../components';
-import { useUserStore } from '../../../core/store';
-import type { AdaptationMode } from '../../../core/types';
+import { useTheme } from '@theme';
+import { PraxisButton, IconButton, Card, Spacer } from '@components';
+import { useUserStore } from '@core/store';
+import type { AdaptationMode } from '@core/types';
 
 type MainStackParamList = {
   Settings: undefined;
@@ -115,11 +115,11 @@ export default function AdaptiveEngineSettingsScreen() {
             {
               backgroundColor: isSelected
                 ? theme.colors.acidGreen
-                : theme.colors.graphite,
+                : theme.colors.surface2,
               borderWidth: isSelected ? 0 : 2,
               borderColor: isSelected
                 ? theme.colors.transparent
-                : theme.colors.steel,
+                : theme.colors.surface3,
               borderRadius: theme.radius.lg,
               padding: theme.spacing.lg,
               marginBottom: theme.spacing.md,
@@ -165,7 +165,7 @@ export default function AdaptiveEngineSettingsScreen() {
           {
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
             opacity: 0.4,
           },
         ]}
@@ -175,7 +175,7 @@ export default function AdaptiveEngineSettingsScreen() {
             style={[
               styles.disabledLabel,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.body,
               },
@@ -187,7 +187,7 @@ export default function AdaptiveEngineSettingsScreen() {
             style={[
               styles.disabledSubtext,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
                 marginTop: theme.spacing.xs,
@@ -203,7 +203,7 @@ export default function AdaptiveEngineSettingsScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -214,7 +214,7 @@ export default function AdaptiveEngineSettingsScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -231,7 +231,7 @@ export default function AdaptiveEngineSettingsScreen() {
             style={[
               styles.headerTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h2,
               },
@@ -261,7 +261,7 @@ export default function AdaptiveEngineSettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -286,7 +286,7 @@ export default function AdaptiveEngineSettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.md,
@@ -300,7 +300,7 @@ export default function AdaptiveEngineSettingsScreen() {
             style={[
               styles.descriptionText,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.bodySmall,
                 marginBottom: theme.spacing.lg,
@@ -326,7 +326,7 @@ export default function AdaptiveEngineSettingsScreen() {
               value={readinessScalingEnabled}
               onValueChange={setReadinessScalingEnabled}
               trackColor={{
-                false: theme.colors.graphite,
+                false: theme.colors.surface2,
                 true: theme.colors.acidGreen + '80', // Reduced opacity
               }}
               thumbColor={
@@ -334,7 +334,7 @@ export default function AdaptiveEngineSettingsScreen() {
                   ? theme.colors.acidGreen
                   : theme.colors.mutedDark
               }
-              ios_backgroundColor={theme.colors.graphite}
+              ios_backgroundColor={theme.colors.surface2}
             />
           </View>
         </Card>
@@ -349,7 +349,7 @@ export default function AdaptiveEngineSettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -374,7 +374,7 @@ export default function AdaptiveEngineSettingsScreen() {
           {
             padding: theme.spacing.lg,
             borderTopWidth: 1,
-            borderTopColor: theme.colors.steel,
+            borderTopColor: theme.colors.surface3,
           },
         ]}
       >

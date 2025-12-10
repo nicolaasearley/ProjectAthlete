@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useTheme } from '../../../theme';
-import { PraxisButton } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { PraxisButton } from '@components';
+import { useUserStore } from '@core/store';
 
 const daysOptions = [3, 4, 5, 6, 7];
 
@@ -26,7 +26,7 @@ export default function DaysPerWeekScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top', 'bottom']}
     >
       <View
@@ -42,7 +42,7 @@ export default function DaysPerWeekScreen() {
           style={[
             styles.title,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.heading,
               fontSize: theme.typography.sizes.h2,
               marginBottom: theme.spacing.xxxl,
@@ -67,11 +67,11 @@ export default function DaysPerWeekScreen() {
                     {
                       backgroundColor: isSelected
                         ? theme.colors.acidGreen
-                        : theme.colors.graphite,
+                        : theme.colors.surface2,
                       borderWidth: isSelected ? 0 : 1,
                       borderColor: isSelected
                         ? theme.colors.transparent
-                        : theme.colors.steel,
+                        : theme.colors.surface3,
                       borderRadius: theme.radius.pill,
                       paddingVertical: theme.spacing.md,
                       paddingHorizontal: theme.spacing.xl,

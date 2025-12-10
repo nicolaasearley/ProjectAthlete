@@ -11,15 +11,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../theme';
-import { Card, PraxisButton, Spacer } from '../../components';
-import { useUserStore } from '../../../core/store';
+import { useTheme } from '@theme';
+import { Card, PraxisButton, Spacer } from '@components';
+import { useUserStore } from '@core/store';
 import type {
   TrainingGoal,
   ExperienceLevel,
   TimeAvailability,
   AdaptationMode,
-} from '../../../core/types';
+} from '@core/types';
 
 type MainStackParamList = {
   Preferences: undefined;
@@ -128,7 +128,7 @@ export default function SettingsScreen() {
           {
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
         onPress={onPress}
@@ -139,7 +139,7 @@ export default function SettingsScreen() {
           style={[
             styles.rowLabel,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.bodyMedium,
               fontSize: theme.typography.sizes.body,
             },
@@ -152,7 +152,7 @@ export default function SettingsScreen() {
             style={[
               styles.rowValue,
               {
-                color: theme.colors.muted,
+                color: theme.colors.textMuted,
                 fontFamily: theme.typography.fonts.body,
                 fontSize: theme.typography.sizes.body,
                 marginRight: theme.spacing.sm,
@@ -185,7 +185,7 @@ export default function SettingsScreen() {
           {
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -193,7 +193,7 @@ export default function SettingsScreen() {
           style={[
             styles.rowLabel,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.bodyMedium,
               fontSize: theme.typography.sizes.body,
             },
@@ -205,11 +205,11 @@ export default function SettingsScreen() {
           value={value}
           onValueChange={onValueChange}
           trackColor={{
-            false: theme.colors.steel,
+            false: theme.colors.surface3,
             true: theme.colors.acidGreen,
           }}
           thumbColor={theme.colors.white}
-          ios_backgroundColor={theme.colors.steel}
+          ios_backgroundColor={theme.colors.surface3}
         />
       </View>
     );
@@ -217,7 +217,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.carbon }]}
+      style={[styles.container, { backgroundColor: theme.colors.appBg }]}
       edges={['top']}
     >
       {/* Header */}
@@ -228,7 +228,7 @@ export default function SettingsScreen() {
             paddingHorizontal: theme.spacing.lg,
             paddingVertical: theme.spacing.md,
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.steel,
+            borderBottomColor: theme.colors.surface3,
           },
         ]}
       >
@@ -236,7 +236,7 @@ export default function SettingsScreen() {
           style={[
             styles.headerTitle,
             {
-              color: theme.colors.white,
+              color: theme.colors.textPrimary,
               fontFamily: theme.typography.fonts.headingMedium,
               fontSize: theme.typography.sizes.h2,
             },
@@ -264,7 +264,7 @@ export default function SettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.lg,
@@ -279,7 +279,7 @@ export default function SettingsScreen() {
               style={[
                 styles.profileLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.bodyMedium,
                   fontSize: theme.typography.sizes.bodySmall,
                   marginBottom: theme.spacing.xs,
@@ -292,7 +292,7 @@ export default function SettingsScreen() {
               style={[
                 styles.profileValue,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom: theme.spacing.md,
@@ -306,7 +306,7 @@ export default function SettingsScreen() {
               style={[
                 styles.profileLabel,
                 {
-                  color: theme.colors.muted,
+                  color: theme.colors.textMuted,
                   fontFamily: theme.typography.fonts.bodyMedium,
                   fontSize: theme.typography.sizes.bodySmall,
                   marginBottom: theme.spacing.xs,
@@ -319,7 +319,7 @@ export default function SettingsScreen() {
               style={[
                 styles.profileValue,
                 {
-                  color: theme.colors.white,
+                  color: theme.colors.textPrimary,
                   fontFamily: theme.typography.fonts.body,
                   fontSize: theme.typography.sizes.body,
                   marginBottom: theme.spacing.md,
@@ -335,7 +335,7 @@ export default function SettingsScreen() {
                   style={[
                     styles.profileLabel,
                     {
-                      color: theme.colors.muted,
+                      color: theme.colors.textMuted,
                       fontFamily: theme.typography.fonts.bodyMedium,
                       fontSize: theme.typography.sizes.bodySmall,
                       marginBottom: theme.spacing.xs,
@@ -348,7 +348,7 @@ export default function SettingsScreen() {
                   style={[
                     styles.profileValue,
                     {
-                      color: theme.colors.white,
+                      color: theme.colors.textPrimary,
                       fontFamily: theme.typography.fonts.body,
                       fontSize: theme.typography.sizes.body,
                       marginBottom: theme.spacing.md,
@@ -381,7 +381,7 @@ export default function SettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.md,
@@ -427,7 +427,7 @@ export default function SettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.md,
@@ -453,7 +453,7 @@ export default function SettingsScreen() {
                       paddingVertical: theme.spacing.md,
                       borderBottomWidth:
                         index < equipmentList.length - 1 ? 1 : 0,
-                      borderBottomColor: theme.colors.steel,
+                      borderBottomColor: theme.colors.surface3,
                     },
                   ]}
                 >
@@ -461,7 +461,7 @@ export default function SettingsScreen() {
                     style={[
                       styles.rowLabel,
                       {
-                        color: theme.colors.white,
+                        color: theme.colors.textPrimary,
                         fontFamily: theme.typography.fonts.body,
                         fontSize: theme.typography.sizes.body,
                       },
@@ -479,7 +479,7 @@ export default function SettingsScreen() {
                     <Ionicons
                       name="ellipse-outline"
                       size={24}
-                      color={theme.colors.steel}
+                      color={theme.colors.surface3}
                     />
                   )}
                 </View>
@@ -498,7 +498,7 @@ export default function SettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.md,
@@ -528,7 +528,7 @@ export default function SettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.md,
@@ -605,7 +605,7 @@ export default function SettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.md,
@@ -641,7 +641,7 @@ export default function SettingsScreen() {
             style={[
               styles.sectionTitle,
               {
-                color: theme.colors.white,
+                color: theme.colors.textPrimary,
                 fontFamily: theme.typography.fonts.headingMedium,
                 fontSize: theme.typography.sizes.h3,
                 marginBottom: theme.spacing.md,

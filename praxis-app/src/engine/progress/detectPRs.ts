@@ -2,7 +2,7 @@ import type {
   WorkoutSessionLog,
   CompletedSet,
   PRRecord,
-} from '../../core/types';
+} from '@core/types';
 
 export interface DetectPRsParams {
   session: WorkoutSessionLog;

@@ -2,7 +2,7 @@ import type {
   StrengthNumbers,
   ExerciseDefinition,
   MuscleGroup,
-} from '../../core/types';
+} from '@core/types';
 
 /**
  * Strength Block interface for prescription generation
